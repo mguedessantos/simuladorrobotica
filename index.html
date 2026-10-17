@@ -275,6 +275,16 @@ main {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* --- TUTORIAL --- */
+#tut{padding:10px 16px;border-bottom:1px solid var(--line);background:var(--soft);max-height:215px;overflow:auto;font-size:14px}
+#tut .tt{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:16px;font-weight:700;color:var(--ink-dark)}
+#tut .tt select{padding:3px 8px;font-size:13px}
+#tut .hint{margin-top:6px;padding:6px 10px;border-left:3px solid var(--warn);background:var(--panel);border-radius:6px}
+#tutL{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:2px 12px;margin-top:6px}
+#tut .ok{color:#16a34a;font-weight:700}
+#tut .ar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+#tut button,#tut input[type=text]{padding:4px 10px;font-size:13px}
 </style>
 </head>
 <body>
@@ -284,6 +294,7 @@ main {
   <button data-mode="sim" class="on">🎮 Simular</button>
   <button data-mode="build">🔧 Montar robô</button>
   <button data-mode="arena">🗺️ Arena</button>
+  <button id="tutBtn">🆓 Modo livre</button>
   <div class="sp"></div>
   <label><input type="checkbox" id="noise"> 〰️ Ruído dos sensores</label>
   <label>⚡ Velocidade 
@@ -303,6 +314,22 @@ main {
     <div id="blocks"></div>
   </section>
   <section class="card">
+    <div id="tut">
+      <div class="tt"><span id="tutT"></span><select id="tutSel"></select></div>
+      <div id="tutD"></div>
+      <div id="tutL"></div>
+      <div class="ar">
+        <button id="tutHint">💡 Dica</button>
+        <button id="tutChk" class="pri">✅ Verificar robô</button>
+        <button id="tutRst">🔁 Recomeçar fase</button>
+        <button id="tutClr">🧹 Limpar blocos</button>
+        <span class="sp"></span>
+        <input type="text" id="rnm" placeholder="Nome do robô" size="16">
+        <button id="rbSave" class="pri">💾 Salvar robô</button>
+        <button id="rbOpen">📂 Abrir robô</button>
+        <input type="file" id="rbFile" accept=".robosim,.json,application/json" style="display:none">
+      </div>
+    </div>
     <div class="row" id="rowBuild" style="display:none">
       <b>🧱 Peças:</b>
       <button data-part="block" class="on">Bloco</button>
@@ -320,6 +347,7 @@ main {
       <button id="clawbot">🦀 C/ Garra</button>
       <button id="clrbot">✨ Limpar</button>
       <button id="undo">↩️ Desfazer</button>
+      <label>🧭 Frente <select id="frontSel"><option value="0">↑ topo da tela</option><option value="1">→ direita</option><option value="2">↓ baixo</option><option value="3">← esquerda</option></select></label>
       <label><input type="checkbox" id="lbl" checked> Rótulos</label>
     </div>
     
@@ -396,6 +424,9 @@ main {
 const $=id=>document.getElementById(id),DT=1/60,SPD=0.3,PXC=5,NI=11,NJ=13,CX=5,CY=6;
 const cl=x=>Math.max(-100,Math.min(100,+x||0)),status=t=>$('st').textContent=t;
 let parts=[],objs=[],sel=null,mode='sim',partTool='block',aTool='select',RB={};
+let FR=2;const FV=[[0,-1],[1,0],[0,1],[-1,0]],fvec=()=>{const f=FV[FR];return{Fx:f[0],Fy:f[1],Lx:-f[1],Ly:f[0]};},
+  dotF=(a,b)=>{const v=fvec();return a*v.Fx+b*v.Fy;},dotL=(a,b)=>{const v=fvec();return a*v.Lx+b*v.Ly;},
+  fa=(a,b)=>{const x=b.i-a.i,y=b.j-a.j;return dotL(x,y)===0&&Math.abs(dotF(x,y))===1;};
 const START={x:-100,z:0,a:0},bot={x:-100,z:0,a:0,l:0,r:0,v:0,w:0,move(d,v){const m={F:[v,v],B:[-v,-v],L:[-v,v],R:[v,-v]}[d];this.l=m[0];this.r=m[1];}};
 const sim={time:0,running:false,gen:null,speed:1,c:{ramp:0,green:0,balls:0,end:0,hit:0}};
 
@@ -467,7 +498,7 @@ function rebuild(){while(objG.children.length)objG.remove(objG.children[0]);
 const robot=new THREE.Group(),body=new THREE.Group();robot.add(body);scene.add(robot);
 function calc(){const w=parts.filter(p=>p.t==='wheel'),n=w.length||1;
   const ai=w.length?w.reduce((s,p)=>s+p.i,0)/n:CX,aj=w.length?w.reduce((s,p)=>s+p.j,0)/n:CY;
-  const Lw=w.filter(p=>p.i<ai),Rw=w.filter(p=>p.i>ai),m=a=>a.reduce((s,p)=>s+p.i,0)/a.length,lc=p=>({lat:(p.i-ai)*2,f:(aj-p.j)*2}),u=parts.find(p=>p.t==='ultra');
+  const lc=p=>({lat:dotL(p.i-ai,p.j-aj)*2,f:dotF(p.i-ai,p.j-aj)*2}),Lw=w.filter(p=>lc(p).lat<-1e-6),Rw=w.filter(p=>lc(p).lat>1e-6),m=a=>a.reduce((s,p)=>s+lc(p).lat/2,0)/a.length,u=parts.find(p=>p.t==='ultra');
   let M=0,I=0,sf=0,slat=0,shh=0;for(const p of parts){const l=lc(p),q=(MS[p.t]||5)/1000,hh=(p.t==='wheel'||p.t==='caster')?3:3+2*(p.k||0);M+=q;sf+=q*l.f;slat+=q*l.lat;shh+=q*hh;I+=q*((l.f/100)**2+(l.lat/100)**2);}
   const hl=hull(parts.filter(p=>p.t==='wheel'||p.t==='caster').map(lc));
   const rc=parts.reduce((r,p)=>{const l=lc(p),e=p.t==='wheel'?3:1;return{f0:Math.min(r.f0,l.f-e),f1:Math.max(r.f1,l.f+e),l0:Math.min(r.l0,l.lat-1),l1:Math.max(r.l1,l.lat+1)};},{f0:1e9,f1:-1e9,l0:1e9,l1:-1e9});
@@ -475,7 +506,7 @@ function calc(){const w=parts.filter(p=>p.t==='wheel'),n=w.length||1;
     sens:parts.filter(p=>p.t==='color').map(p=>Object.assign({p},lc(p))).sort((a,b)=>a.lat-b.lat||b.f-a.f),ultra:u?lc(u):null,claw:(cw=>cw?lc(cw):null)(parts.find(p=>p.t==='claw')),
     R:Math.max(6,...parts.map(p=>{const l=lc(p);return Math.hypot(l.lat,l.f)+1;}))};
   const lb=new Map(),nm=(a,pr)=>a.forEach((p,i)=>lb.set(p,pr+(a.length>1?i+1:'')));
-  nm(Lw.slice().sort((x,y)=>x.j-y.j),'ME');nm(Rw.slice().sort((x,y)=>x.j-y.j),'MD');nm(parts.filter(p=>p.t==='caster').sort((x,y)=>x.i-y.i),'RZ');
+  nm(Lw.slice().sort((x,y)=>lc(y).f-lc(x).f),'ME');nm(Rw.slice().sort((x,y)=>lc(y).f-lc(x).f),'MD');nm(parts.filter(p=>p.t==='caster').sort((x,y)=>lc(x).lat-lc(y).lat),'RZ');
   RB.sens.forEach((o,i)=>lb.set(o.p,'SC'+(i+1)));if(u)lb.set(u,'US1');
   const gy=parts.find(p=>p.t==='gyro'),cw2=parts.find(p=>p.t==='claw');if(gy)lb.set(gy,'GI1');if(cw2)lb.set(cw2,'GR1');RB.lbl=lb;}
 const PM={block:[0x8892a6,()=>new THREE.BoxGeometry(2,2,2),3],wheel:[0x222831,()=>{const g=new THREE.CylinderGeometry(3,3,2,20);g.rotateX(Math.PI/2);return g;},3],
@@ -495,12 +526,12 @@ function mkPart(p){const g=new THREE.Group(),t=p.t;
   else if(t==='caster'){g.add(bx(2,2,2,0xaeb7c4,0,0,0),cy(.8,.5,0x4b5563,0,-1.15,0),(m=>{m.position.set(0,-2,0);return m;})(new THREE.Mesh(new THREE.SphereGeometry(1,16,12),mat(0xe5e7eb))));for(const a of[-.5,.5])for(const b of[-.5,.5])g.add(nr(cy(.38,.25,0xc9d2de,a,1.12,b)));}
   else if(t==='battery'){g.add(bx(2,2,2,0x1f2937,0,0,0),bx(2.04,.5,.9,0xdc2626,0,.55,0),bx(.4,.3,.6,0xfacc15,-1.1,0,0));for(const a of[-.5,.5])for(const b of[-.5,.5])g.add(nr(cy(.38,.25,0x3b4658,a,1.12,b)));}
   return g;}
-function inn(p){const h=d=>parts.some(q=>q!==p&&q.t!=='wheel'&&q.i===p.i+d&&q.j===p.j&&(q.k||0)===0);
+function inn(p){const V=fvec(),h=d=>parts.some(q=>q!==p&&q.t!=='wheel'&&q.i===p.i+d*V.Lx&&q.j===p.j+d*V.Ly&&(q.k||0)===0);
   const L=h(-1),R=h(1);if(L!==R)return L?-1:1;
-  const np=parts.filter(q=>q.t!=='wheel'),c=np.length?np.reduce((s,q)=>s+q.i,0)/np.length:CX;return p.i>c?-1:1;}
-function facing(p,d){if(p.t==='wheel')return d[2]===0&&d[1]===0&&d[0]===inn(p);
+  const lt=q=>q.i*V.Lx+q.j*V.Ly,np=parts.filter(q=>q.t!=='wheel'),c=np.length?np.reduce((s,q)=>s+lt(q),0)/np.length:CX*V.Lx+CY*V.Ly;return lt(p)>c?-1:1;}
+function facing(p,d){const f=dotF(d[0],d[1]),l=dotL(d[0],d[1]);if(p.t==='wheel')return d[2]===0&&f===0&&l===inn(p);
   if(p.t==='color')return d[2]===0;
-  if(p.t==='ultra'||p.t==='claw')return !(d[0]===0&&d[1]===-1&&d[2]===0);return true;}
+  if(p.t==='ultra'||p.t==='claw')return !(f===1&&l===0&&d[2]===0);return true;}
 function linked(a,b){const d=[b.i-a.i,b.j-a.j,(b.k||0)-(a.k||0)];if(Math.abs(d[0])+Math.abs(d[1])+Math.abs(d[2])!==1)return false;return facing(a,d)&&facing(b,[-d[0],-d[1],-d[2]]);}
 function dropOrphans(){const left=new Set(parts),comps=[];
   while(left.size){const s=left.values().next().value,comp=[s],st=[s];left.delete(s);
@@ -512,9 +543,9 @@ function placeMsg(t,c){const at=(i,j,k)=>parts.some(q=>q.i===i&&q.j===j&&(q.k||0
   const low=t==='wheel'||t==='color'||t==='caster'||t==='claw';
   if(low&&c.k>0)return 'Rodas, sensores de cor, rodízios e garra ficam só na camada de baixo.';
   if(at(c.i,c.j,c.k))return 'Essa posição já está ocupada.';
-  if(c.k<=1&&parts.some(q=>q.t==='wheel'&&q.i===c.i&&Math.abs(q.j-c.j)===1))return 'A roda ocupa esse espaço: deixe a frente e a traseira dela livres.';
-  if(t==='wheel'&&parts.some(q=>q.i===c.i&&Math.abs(q.j-c.j)===1&&(q.k||0)<=1))return 'Há uma peça perto demais: a roda precisa de espaço na frente e atrás.';
-  const inC=(k_,i,j,kk)=>k_.t==='claw'&&Math.abs(i-k_.i)<=2&&j<k_.j&&j>=k_.j-3&&kk<=1;
+  if(c.k<=1&&parts.some(q=>q.t==='wheel'&&fa(q,c)))return 'A roda ocupa esse espaço: deixe a frente e a traseira dela livres.';
+  if(t==='wheel'&&parts.some(q=>fa(c,q)&&(q.k||0)<=1))return 'Há uma peça perto demais: a roda precisa de espaço na frente e atrás.';
+  const inC=(k_,i,j,kk)=>{if(k_.t!=='claw'||kk>1)return false;const a=i-k_.i,b=j-k_.j;return Math.abs(dotL(a,b))<=2&&dotF(a,b)>=1&&dotF(a,b)<=3;};
   if(parts.some(q=>inC(q,c.i,c.j,c.k)))return 'A garra precisa de espaço livre na frente dela.';
   if(t==='claw'&&parts.some(q=>inC({t:'claw',i:c.i,j:c.j},q.i,q.j,q.k||0)))return 'Há peças na frente da garra: libere o espaço dela.';
   if(low&&at(c.i,c.j,1))return 'Já existe uma peça em cima dessa posição.';
@@ -533,6 +564,9 @@ function doMove(c){
   const m=moveMsg(msel,c);if(m){status(m);return;}
   snap();msel.i=c.i;msel.j=c.j;msel.k=c.k;msel=null;buildRobot();status('Peça movida.');}
 const hist=[];function snap(){hist.push(JSON.stringify(parts));if(hist.length>50)hist.shift();}
+$('frontSel').onchange=e=>{const n=+e.target.value,old=FR;FR=n;const sv=parts;parts=sv.slice();const lost=dropOrphans();parts=sv;
+  if(lost){FR=old;e.target.value=old;buildRobot();status('Não dá para virar a frente para esse lado: '+lost+' peça(s) ficariam soltas (rodas, garra e ultrassônico têm um lado certo). Escolha outra frente ou monte as peças de novo.');return;}
+  hist.length=0;msel=null;buildRobot();status('Frente do robô: '+e.target.options[e.target.selectedIndex].text+'. A seta laranja mostra para onde ele anda; as rodas ficam nas laterais.');};
 $('undo').onclick=()=>{if(hist.length){parts=JSON.parse(hist.pop());msel=null;buildRobot();status('Desfeito.');}};
 function hull(pts){const P=[...new Map(pts.map(p=>[p.lat+','+p.f,p])).values()].sort((a,b)=>a.lat-b.lat||a.f-b.f);if(P.length<3)return P;
   const cr=(o,a,b)=>(a.lat-o.lat)*(b.f-o.f)-(a.f-o.f)*(b.lat-o.lat),lo=[],up=[];
@@ -548,8 +582,10 @@ function tilt(af,al,sl){if(!RB.hull)return '';if(RB.hull.length<3)return RB.cf>=
 function tipMsg(T){return 'O robô tombou '+({F:'para frente',B:'para trás',L:'para a esquerda',R:'para a direita'}[T])+'. '+(RB.hull.length<3?'Adicione um rodízio para ter três pontos de apoio.':'Abaixe ou desloque o centro de massa (veja o ponto vermelho no construtor).');}
 const comM=new THREE.Mesh(new THREE.SphereGeometry(.55,12,10),new THREE.MeshBasicMaterial({color:0xef4444})),comL=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xef4444}));
 let supM=null;scene.add(comM,comL);
-function vizBuild(){const on=mode==='build';comM.visible=comL.visible=on;if(supM){scene.remove(supM);supM.geometry.dispose();supM=null;}if(!on)return;
-  const W=(lat,f)=>[lat+(RB.ai-CX)*2,(RB.aj-CY)*2-f],y=body.position.y,w0=W(RB.cl,RB.cf);
+const frontA=new THREE.ArrowHelper(new THREE.Vector3(0,0,-1),new THREE.Vector3(),6,0xf59e0b,2.4,1.8);frontA.visible=false;scene.add(frontA);
+function vizBuild(){const on=mode==='build';comM.visible=comL.visible=on;frontA.visible=on&&parts.length>0;if(supM){scene.remove(supM);supM.geometry.dispose();supM=null;}if(!on)return;
+  const V=fvec(),W=(lat,f)=>[(RB.ai-CX)*2+f*V.Fx+lat*V.Lx,(RB.aj-CY)*2+f*V.Fy+lat*V.Ly],y=body.position.y,w0=W(RB.cl,RB.cf);
+  {const a=W(0,RB.R+1.5);frontA.position.set(a[0],.8,a[1]);frontA.setDirection(new THREE.Vector3(V.Fx,0,V.Fy));}
   comM.position.set(w0[0],RB.hc+y,w0[1]);comL.geometry.setFromPoints([new THREE.Vector3(w0[0],RB.hc+y,w0[1]),new THREE.Vector3(w0[0],.08,w0[1])]);
   if(RB.hull.length>=3){const sh=new THREE.Shape(RB.hull.map(p=>{const w=W(p.lat,p.f);return new THREE.Vector2(w[0],-w[1]);}));
     supM=new THREE.Mesh(new THREE.ShapeGeometry(sh),new THREE.MeshBasicMaterial({color:tilt(0,0,0)?0xef4444:0x22c55e,transparent:true,opacity:.35,side:THREE.DoubleSide}));supM.rotation.x=-Math.PI/2;supM.position.y=.07;scene.add(supM);}}
@@ -558,14 +594,15 @@ function labelSprite(t){let m=labCache[t];if(!m){const c=document.createElement(
     m=labCache[t]=new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false,transparent:true});}
   const s=new THREE.Sprite(m);s.scale.set(5,2.5,1);s.renderOrder=20;s.raycast=()=>{};return s;}
 $('lbl').onchange=e=>{labelsOn=e.target.checked;buildRobot();};
-let clawG=null;function buildRobot(){calc();clawG=null;while(body.children.length)body.remove(body.children[0]);
-  for(const p of parts){const g=mkPart(p),y=p.t==='wheel'?3:3+2*(p.k||0);g.position.set((RB.aj-p.j)*2,y,(p.i-RB.ai)*2);const lt=RB.lbl&&RB.lbl.get(p);if(lt&&labelsOn){const sp=labelSprite(lt);sp.position.set(0,2.6,0);g.add(sp);}
+let clawG=null;function buildRobot(){const fsl=$('frontSel');if(fsl)fsl.value=FR;calc();clawG=null;while(body.children.length)body.remove(body.children[0]);
+  for(const p of parts){const g=mkPart(p),y=p.t==='wheel'?3:3+2*(p.k||0);g.position.set(dotF(p.i-RB.ai,p.j-RB.aj)*2,y,dotL(p.i-RB.ai,p.j-RB.aj)*2);const lt=RB.lbl&&RB.lbl.get(p);if(lt&&labelsOn){const sp=labelSprite(lt);sp.position.set(0,2.6,0);g.add(sp);}
     g.traverse(o=>{o.userData={i:p.i,j:p.j,k:p.k||0};});body.add(g);if(p.t==='claw')clawG=g;}body.position.y=parts.some(p=>p.t==='wheel')?0:-2;poseRobot();showSel();vizBuild();}
-function poseRobot(){if(clawG){const gp=clawGap(mode==='build'?90:bot.ca);clawG.fingers[0].position.z=-(gp/2+.25);clawG.fingers[1].position.z=gp/2+.25;}if(mode==='build'){robot.rotation.y=Math.PI/2;robot.position.set(-(CX-RB.ai)*2,0,(RB.aj-CY)*2);body.rotation.z=0;body.rotation.x=0;return;}
+function poseRobot(){if(clawG){const gp=clawGap(mode==='build'?90:bot.ca);clawG.fingers[0].position.z=-(gp/2+.25);clawG.fingers[1].position.z=gp/2+.25;}if(mode==='build'){{const v=fvec();robot.rotation.y=Math.atan2(-v.Fy,v.Fx);}robot.position.set((RB.ai-CX)*2,0,(RB.aj-CY)*2);body.rotation.z=0;body.rotation.x=0;return;}
   const c=Math.cos(bot.a),s=Math.sin(bot.a);robot.position.set(bot.x,hAt(bot.x,bot.z),bot.z);robot.rotation.y=-bot.a;
   body.rotation.z=Math.atan2(hAt(bot.x+c*8,bot.z+s*8)-hAt(bot.x-c*8,bot.z-s*8),16)+(bot.tip==='F'?-.45:bot.tip==='B'?.45:0);body.rotation.x=bot.tip==='R'?.5:bot.tip==='L'?-.5:0;}
-function defBot(){parts=[];for(let i=3;i<=7;i++)for(let j=4;j<=8;j++)parts.push({t:'block',i,j});
-  parts.push({t:'wheel',i:2,j:7},{t:'wheel',i:8,j:7},{t:'color',i:4,j:3},{t:'color',i:6,j:3},{t:'ultra',i:5,j:3},{t:'battery',i:5,j:4,k:1},{t:'caster',i:3,j:3},{t:'caster',i:7,j:3});buildRobot();}
+const rot180=()=>{parts=parts.map(p=>Object.assign({},p,{i:10-p.i,j:12-p.j}));FR=2;};
+function defBot(raw){FR=0;parts=[];for(let i=3;i<=7;i++)for(let j=4;j<=8;j++)parts.push({t:'block',i,j});
+  parts.push({t:'wheel',i:2,j:7},{t:'wheel',i:8,j:7},{t:'color',i:4,j:3},{t:'color',i:6,j:3},{t:'ultra',i:5,j:3},{t:'battery',i:5,j:4,k:1},{t:'caster',i:3,j:3},{t:'caster',i:7,j:3});if(!raw)rot180();buildRobot();}
 
 /* ---------- Sensores ---------- */
 const wp=(lat,f)=>[bot.x+Math.cos(bot.a)*f-Math.sin(bot.a)*lat,bot.z+Math.sin(bot.a)*f+Math.cos(bot.a)*lat];
@@ -634,8 +671,9 @@ Blockly.defineBlocksWithJsonArray([
  {type:'round',message0:'arredondamento de %1',args0:[val('A','Number')],output:'Number',style:'logic'},
  {type:'map',message0:'mapear %1 de %2 ~ %3 a %4 ~ %5',args0:[val('X','Number'),val('A','Number'),val('B','Number'),val('C','Number'),val('D','Number')],inputsInline:true,output:'Number',style:'logic'}]);
 const sh=v=>({shadow:{type:'num',fields:{N:v}}}),blk=(t,i)=>({kind:'block',type:t,inputs:i});
+let TB;
 const ws=Blockly.inject('blocks',{theme,renderer:'zelos',trashcan:true,zoom:{startScale:.9,controls:true},grid:{spacing:24,length:2,colour:dk?'#2c3644':'#e1e5eb',snap:true},
- toolbox:{kind:'categoryToolbox',contents:[
+ toolbox:TB={kind:'categoryToolbox',contents:[
  {kind:'category',name:'Eventos',colour:'#e6a800',contents:[blk('start')]},
  {kind:'category',name:'Movimento',colour:'#4c97ff',contents:[blk('move',{V:sh(50)}),blk('move_for',{V:sh(50),T:sh(1)}),blk('motors',{L:sh(50),R:sh(50)}),blk('stop')]},
  {kind:'category',name:'Sensores',colour:'#2da8c9',contents:[blk('cor_ve'),blk('cor_luz'),blk('cor_analog'),blk('ultra'),blk('gyro'),blk('score'),blk('speed'),blk('timer_get'),blk('timer_reset')]},
@@ -651,9 +689,7 @@ function starter(){ws.clear();const eye=n=>B('cor_ve',{N:n,C:'B'});
   const line=B('ifelse',{},{C:eye('1')},{DO:mot(10,50),ELSE:B('ifelse',{},{C:eye('2')},{DO:mot(50,10),ELSE:mot(50,50)})});
   const p=B('forever',{},{},{DO:B('ifelse',{},{C:CMP(B('ultra'),'<',N(12))},{DO:B('stop'),ELSE:line})});
   const s=B('start');s.nextConnection.connect(p.previousConnection);s.moveBy(30,30);}
-let restored=false;try{const s=localStorage.getItem('prog3');if(s){Blockly.serialization.workspaces.load(JSON.parse(s),ws);restored=ws.getAllBlocks().length>0;}}catch(e){}
-if(!restored)starter();
-ws.addChangeListener(e=>{if(e.isUiEvent)return;try{localStorage.setItem('prog3',JSON.stringify(Blockly.serialization.workspaces.save(ws)));}catch(x){}});
+ws.clear();
 
 /* ---------- Interpretador (sem eval) ---------- */
 const VARS={};let TIM0=0,noiseOn=false;$('noise').onchange=e=>{noiseOn=e.target.checked;};
@@ -707,12 +743,12 @@ function* one(b){const v=n=>ev(b.getInputTargetBlock(n)),sub=n=>b.getInputTarget
    case 'ifelse':yield* exec(sub(v('C')?'DO':'ELSE'));break;}}
 
 /* ---------- Simulação ---------- */
-function resetBot(){bot.x=START.x;bot.z=START.z;bot.a=START.a;bot.l=bot.r=0;bot.v=bot.w=0;bot.tip=null;bot.af=0;bot.ca=bot.ct=90;obrReset();sim.time=0;sim.c={ramp:0,green:0,balls:0,end:0,hit:0,tomb:0};for(const o of objs)if(o.t==='vic'||o.t==='cube'){o.x=o.x0;o.z=o.z0;o.held=false;o.vx=o.vz=0;o.ang=o.a0||0;}rebuild();}
+function resetBot(){TUT.f={};bot.x=START.x;bot.z=START.z;bot.a=START.a;bot.l=bot.r=0;bot.v=bot.w=0;bot.tip=null;bot.af=0;bot.ca=bot.ct=90;obrReset();sim.time=0;sim.c={ramp:0,green:0,balls:0,end:0,hit:0,tomb:0};for(const o of objs)if(o.t==='vic'||o.t==='cube'){o.x=o.x0;o.z=o.z0;o.held=false;o.vx=o.vz=0;o.ang=o.a0||0;}rebuild();}
 function check(){obrCheck();const c=sim.c,g=objs.filter(o=>o.t==='green'&&o.w>6),gl=objs.find(o=>o.t==='goal');if(!gl)return;
   const ins=(o,x,z)=>Math.abs(x-o.x)<o.w/2&&Math.abs(z-o.z)<o.d/2,vs=objs.filter(o=>o.t==='vic');
   if(hAt(bot.x,bot.z)>=11)c.ramp=1;if(g.some(o=>ins(o,bot.x,bot.z)))c.green=1;
   c.balls=c.green&&vs.length&&!vs.some(v=>g.some(o=>ins(o,v.x,v.z)))?1:0;if(ins(gl,bot.x,bot.z)&&!bot.l&&!bot.r)c.end=1;}
-function chkTxt(){const c=sim.c;if(!objs.some(o=>o.t==='goal'))return'';const t=v=>v?'✔':'✖';
+function chkTxt(){if(TUT.on)return'';const c=sim.c;if(!objs.some(o=>o.t==='goal'))return'';const t=v=>v?'✔':'✖';
   return'  |  Desafio: rampa '+t(c.ramp)+' área verde '+t(c.green)+' bolinhas fora '+t(c.balls)+' ponto final '+t(c.end)+' sem bater '+t(!c.hit)+' sem tombar '+t(!c.tomb);}
 const FS=2.62,V0=0.628,MU=0.7,G=9.81;
 function dyn(dt){if(bot.tip)return;const m=RB.m,wbm=RB.wb/100,c=Math.cos(bot.a),s=Math.sin(bot.a),n=RB.nL+RB.nR||1;
@@ -797,7 +833,7 @@ function frame(){if(mode!=='build'){for(let k=0;k<sim.speed;k++){
     if(sim.running){try{if(sim.gen.next().done){sim.running=false;bot.l=bot.r=0;status('Programa terminou.');}}catch(e){sim.running=false;bot.l=bot.r=0;status('Erro no programa: '+e.message);}}
     if(mode==='sim'){phys();check();}}
   poseRobot();$('sn').textContent='Sensores de cor: '+(RB.sens.map((_,i)=>'SC'+(i+1)+'='+S.light(i+1)).join('  ')||'nenhum')+'  |  ultrassônico: '+S.ultra()+' cm  |  vítimas na zona: '+score()+'  |  massa: '+Math.round(RB.m*1000)+' g  |  velocidade: '+Math.round(bot.v*100)+' cm/s'+chkTxt()+varTxt()+obrTxt();}
-  if(mode==='build')$('sn').textContent=massTxt();hudTick();controls.update();renderer.render(scene,camera);requestAnimationFrame(frame);}
+  if(mode==='build')$('sn').textContent=massTxt();hudTick();tutTick();controls.update();renderer.render(scene,camera);requestAnimationFrame(frame);}
 $('run').onclick=()=>{const s=ws.getTopBlocks(false).find(b=>b.type==='start');
   if(!s){status('Adicione o bloco "quando o robô iniciar".');return;}
   if(!RB.ok){status('Monte o robô com rodas dos dois lados (aba Montar robô).');return;}
@@ -807,7 +843,7 @@ $('reset').onclick=()=>{sim.running=false;resetBot();status('Robô e vítimas na
 $('spd').onchange=e=>sim.speed=+e.target.value;
 
 /* ---------- Abas ---------- */
-function setMode(m){mode=m;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+function setMode(m){mode=m;if(m==='build'&&!parts.length)FR=2;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
   $('rowBuild').style.display=m==='build'?'flex':'none';$('rowArena').style.display=m==='arena'?'flex':'none';$('rowObr').style.display=m==='arena'?'flex':'none';grid.visible=m==='build';
   if(m==='build'){sim.running=false;camera.position.set(0,40,28);}else{camera.position.set(0,AZ*2.1,AZ*1.5);if(!sim.running)resetBot();}
   bplane.visible=m==='build';floor.visible=m!=='build';objG.visible=m!=='build';hov.visible=false;
@@ -816,8 +852,8 @@ function setMode(m){mode=m;document.querySelectorAll('[data-mode]').forEach(b=>b
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 const tog=(sel_,k,fn)=>document.querySelectorAll(sel_).forEach(b=>b.onclick=()=>{fn(b.dataset[k]);document.querySelectorAll(sel_).forEach(x=>x.classList.toggle('on',x===b));});
 tog('[data-part]','part',v=>{partTool=v;msel=null;showSel();});tog('[data-tool]','tool',v=>aTool=v);
-function defClaw(){defBot();parts=parts.filter(p=>p.t!=='ultra'&&p.t!=='battery');parts.push({t:'claw',i:5,j:3},{t:'ultra',i:5,j:4,k:1},{t:'battery',i:5,j:6,k:1},{t:'gyro',i:4,j:6,k:1});buildRobot();}
-$('defbot').onclick=()=>{snap();defBot();};$('clawbot').onclick=()=>{snap();defClaw();};$('clrbot').onclick=()=>{snap();parts=[];buildRobot();};
+function defClaw(){defBot(true);parts=parts.filter(p=>p.t!=='ultra'&&p.t!=='battery');parts.push({t:'claw',i:5,j:3},{t:'ultra',i:5,j:4,k:1},{t:'battery',i:5,j:6,k:1},{t:'gyro',i:4,j:6,k:1});rot180();buildRobot();}
+$('defbot').onclick=()=>{snap();defBot();};$('clawbot').onclick=()=>{snap();defClaw();};$('clrbot').onclick=()=>{snap();parts=[];FR=2;buildRobot();};
 
 /* ---------- Edição com o ponteiro ---------- */
 const ray=new THREE.Raycaster(),pl=new THREE.Plane(new THREE.Vector3(0,1,0),0),v3=new THREE.Vector3(),nd=new THREE.Vector2();
@@ -930,6 +966,7 @@ function genCurso(R,dx,eC){
     way.push({x:xe,z,pts,lbl});}
   return{z0,way};}
 function goals(){
+  if(TUT.on)return[];
   if(OBR.on){const g=[{t:'Sair do ladrilho de início',d:OBR.start5,p:5}];
     OBR.way.forEach((w,i)=>{if(w.lbl)g.push({t:w.lbl,d:i<OBR.wi,p:w.pts});});
     g.push({t:'Entrar na sala (fita prata)',d:OBR.entered});
@@ -1099,8 +1136,8 @@ function buildSolucao(){
 $('obrSol').onclick=()=>{defClaw();genOBR($('obrSeed').value,$('obrSize').value,$('obrExit').value,$('obrCurso').checked);buildSolucao();setMode('sim');
   status('Exemplo carregado: sala OBR gerada, robô com garra e giroscópio e um programa em máquina de estados (passe o mouse no comentário de cada bloco "se estado = ..."). Clique em Executar.');};
 /* ---------- Projetos salvos ---------- */
-const pack=()=>JSON.stringify({parts,objs,start:START,arena:[AX,AZ]},(k,v)=>k==='_m'?undefined:v);
-function unpack(o){OBR.on=false;setArena(...(o.arena||[120,80]));parts=o.parts||[];dropOrphans();objs=o.objs||[];Object.assign(START,o.start||{});sel=null;sim.running=false;paintFloor();buildRobot();resetBot();}
+const pack=()=>JSON.stringify({parts,fr:FR,objs,start:START,arena:[AX,AZ]},(k,v)=>k==='_m'?undefined:v);
+function unpack(o){OBR.on=false;setArena(...(o.arena||[120,80]));FR=((o.fr|0)%4+4)%4;parts=o.parts||[];dropOrphans();objs=o.objs||[];Object.assign(START,o.start||{});sel=null;sim.running=false;paintFloor();buildRobot();resetBot();}
 const getT=()=>{try{return JSON.parse(localStorage.getItem('proj3')||'{}');}catch(e){return{};}};
 function refresh(){const l=$('lst');l.replaceChildren(new Option('Projetos salvos…',''));Object.keys(getT()).forEach(n=>l.add(new Option(n,n)));}
 $('save').onclick=()=>{const n=$('nm').value.trim()||'Meu projeto',t=getT();t[n]=JSON.parse(pack());
@@ -1110,9 +1147,151 @@ $('rm').onclick=()=>{const t=getT(),n=$('lst').value;if(t[n]){delete t[n];try{lo
 $('exp').onclick=()=>{$('js').value=pack();$('js').select();try{navigator.clipboard.writeText($('js').value);}catch(e){}status('JSON gerado. Copie e guarde.');};
 $('imp').onclick=()=>{try{unpack(JSON.parse($('js').value));status('Projeto carregado do JSON.');}catch(e){status('JSON inválido.');}};
 
+/* ---------- Menu do botão direito nos blocos ---------- */
+const lastOf=c=>{while(c.getNextBlock())c=c.getNextBlock();return c;};
+function dupOnly(b){Blockly.Events.setGroup(true);try{
+  const st=Blockly.serialization.blocks.save(b,{addCoordinates:true,addNextBlocks:false});st.x=(st.x||0)+28;st.y=(st.y||0)+28;
+  const nb=Blockly.serialization.blocks.append(st,ws);if(nb&&nb.select)nb.select();}finally{Blockly.Events.setGroup(false);}}
+function delOnly(b){Blockly.Events.setGroup(true);try{
+  const chains=[];for(const inp of b.inputList){if(inp.connection&&inp.connection.type===3&&inp.connection.targetBlock())chains.push(inp.connection.targetBlock());}
+  const next=b.getNextBlock(),prevConn=b.previousConnection?b.previousConnection.targetConnection:null,xy=b.getRelativeToSurfaceXY();
+  chains.forEach(c=>c.unplug());if(next)next.unplug();b.unplug();
+  const seq=chains.concat(next?[next]:[]);let head=null,tail=null;
+  seq.forEach((c,n)=>{if(!head)head=c;
+    if(tail){let okc=false;try{if(tail.nextConnection&&c.previousConnection){tail.nextConnection.connect(c.previousConnection);okc=c.previousConnection.isConnected();}}catch(e){}
+      if(!okc)c.moveBy(24*n,24*n);}
+    tail=lastOf(c);});
+  if(head){let okc=false;try{if(prevConn&&head.previousConnection){prevConn.connect(head.previousConnection);okc=head.previousConnection.isConnected();}}catch(e){}
+    if(!okc){const q=head.getRelativeToSurfaceXY();head.moveBy(xy.x-q.x,xy.y-q.y);}}
+  b.dispose(false);}finally{Blockly.Events.setGroup(false);}}
+(function(){const R=Blockly.ContextMenuRegistry.registry,SC=Blockly.ContextMenuRegistry.ScopeType.BLOCK;
+  ['blockDuplicate','blockComment','blockInline','blockCollapseExpand','blockDisable','blockDelete','blockHelp','blockCopy','blockCut','blockPaste'].forEach(id=>{try{R.unregister(id);}catch(e){}});
+  R.register({id:'rb_dup',scopeType:SC,weight:1,displayText:()=>'📄 Duplicar este bloco',preconditionFn:sc=>sc.block.workspace.isFlyout?'hidden':'enabled',callback:sc=>dupOnly(sc.block)});
+  R.register({id:'rb_del',scopeType:SC,weight:2,displayText:()=>'🗑️ Apagar este bloco',preconditionFn:sc=>sc.block.workspace.isFlyout?'hidden':(sc.block.isDeletable()?'enabled':'disabled'),callback:sc=>delOnly(sc.block)});})();
+
+/* ---------- Tutorial ---------- */
+const TUT={on:true,lvl:1,max:1,hint:false,pause:false,f:{}};
+const Lg=(x1,z1,x2,z2)=>({t:'line',x1,z1,x2,z2}),Poly=p=>p.slice(1).map((q,i)=>Lg(p[i][0],p[i][1],q[0],q[1])),
+  GOALO=(x,z)=>({t:'goal',x,z,w:22,d:30}),WALL=(x,z,len,rot)=>({t:'wall',x,z,rot:rot||0,len,th:5,h:12}),
+  stopped=()=>!bot.l&&!bot.r&&Math.abs(bot.v)<.05&&sim.time>.4,has=t=>parts.some(p=>p.t===t),
+  lineDist=()=>Math.min(1e9,...objs.filter(o=>o.t==='line').map(o=>sd(bot.x,bot.z,o.x1,o.z1,o.x2,o.z2)));
+const IT=(t,d,neg)=>({t,d:!!d,neg:neg?1:0});
+const LV=[
+ {n:'Crie seu robô',lm:'build',manual:1,objs:()=>[],
+  txt:'Monte seu robô do zero na aba <b>Montar robô</b>. Cada peça precisa encaixar em outra, como no LEGO. Você precisa de chassi (blocos), uma roda de cada lado, uma bateria e pelo menos um rodízio. Escolha o lado da <b>frente</b> em 🧭 Frente (a seta laranja mostra para onde ele vai andar). Quando terminar, clique em <b>✅ Verificar robô</b> para saber se ele é viável e seguir para a próxima fase.',
+  hint:'Clique no chão azul para colocar a primeira peça. Coloque cada roda na lateral de um bloco e o rodízio na frente ou atrás, na camada de baixo. O ponto vermelho é o centro de massa: ele deve ficar dentro da área verde (apoio), senão o robô tomba.',
+  items:()=>[IT('Pelo menos 1 bloco de chassi',has('block')),IT('Uma roda de cada lado',RB.ok),IT('Uma bateria',has('battery')),IT('Pelo menos 1 rodízio',has('caster'))]},
+ {n:'Faça o robô andar',objs:()=>[],
+  txt:'Na programação, comece com <b>quando o robô iniciar</b> e use os blocos de <b>Movimento</b> para fazer o robô <b>andar para frente</b>. O objetivo é cumprido quando ele passar da metade da mesa ou encostar na parede do outro lado. Depois clique em ▶ Executar.',
+  hint:'Use "mover para frente com velocidade 50%" (ou "por 3 segundos"). Se o robô não sair do lugar, confira se ele tem uma roda de cada lado e clique em 🔄 Reiniciar para tentar de novo.',
+  tick:()=>{if(bot.x>0||sim.c.hit)TUT.f.a=1;},
+  items:()=>[IT('Andar até passar da metade da mesa ou encostar na parede do outro lado',TUT.f.a)]},
+ {n:'Virar e contornar',objs:()=>[WALL(-27.5,-27.5,185),WALL(62.5,25.25,105.5,Math.PI/2),WALL(-56.25,27.5,127.5),WALL(7.5,53.75,52.5,Math.PI/2),GOALO(35,60)],
+  txt:'Siga o corredor: vá em frente, <b>vire à direita</b> e chegue à área amarela sem encostar nas paredes.',
+  hint:'Para girar no lugar use "mover para a direita"; o tempo de espera define o ângulo. Teste, ajuste o tempo e tente de novo.',
+  items:()=>[IT('Chegar à área amarela',TUT.f.goal),IT('Sem bater nas paredes',!sim.c.hit,1)]},
+ {n:'Sensor de cor: ler o chão',objs:()=>[{t:'tape',x:-10,z:0,w:12,d:70,c:'#111111'}],
+  txt:'O robô precisa "ver" o chão. Na aba <b>Montar robô</b> adicione um <b>sensor de cor</b> na frente (camada de baixo) e programe o robô para andar até a fita preta e parar com o sensor em cima dela.',
+  hint:'Use "espere até que sensor de cor SC1 vê preto" depois de "mover para frente", e então "parar motores". Clique nos blocos de sensor para ver o valor e acompanhe a caixa "Robô e sensores".',
+  tick:()=>{if(stopped()&&!sim.c.hit&&RB.sens.some((s,i)=>S.color(i+1,'B')))TUT.f.a=1;},
+  items:()=>[IT('Sensor de cor montado no robô',RB.sens.length>0),IT('Parar com um sensor sobre a fita preta',TUT.f.a),IT('Sem bater nas paredes',!sim.c.hit,1)]},
+ {n:'Ultrassônico: detectar objetos',objs:()=>[WALL(55,0,60,Math.PI/2)],
+  txt:'O sensor <b>ultrassônico</b> mede a distância até os objetos. Adicione um na frente do robô e pare a <b>no máximo 20 cm</b> da parede, sem encostar.',
+  hint:'Dentro de "sempre": se a distância do ultra-sônico US1 &lt; 20 então "parar motores", senão "mover para frente". Os blocos de comparação estão em Operadores.',
+  tick:()=>{if(RB.ultra&&stopped()){const d=S.ultra('W');if(d>=3&&d<=20&&!sim.c.hit)TUT.f.a=1;}},
+  items:()=>[IT('Sensor ultrassônico montado no robô',RB.ultra),IT('Parar a até 20 cm da parede',TUT.f.a),IT('Sem bater nas paredes',!sim.c.hit,1)]},
+ {n:'Seguir a linha',objs:()=>[...Poly([[-108,0],[-70,0],[-45,-25],[-10,-25],[15,5],[50,5],[75,-30],[98,-30]]),GOALO(98,-30)],
+  txt:'Use os sensores de cor para o robô <b>acompanhar a linha preta</b> até a área amarela. Com 2 sensores (um de cada lado da linha) fica bem mais fácil.',
+  hint:'Dentro de "sempre": se SC1 vê preto → motor esquerdo 10% e direito 50%; senão se SC2 vê preto → motor esquerdo 50% e direito 10%; senão → 50% e 50%.',
+  tick:()=>{if(sim.running&&lineDist()>16)TUT.f.off=1;},
+  items:()=>[IT('Sensor de cor montado no robô',RB.sens.length>0),IT('Chegar à área amarela',TUT.f.goal),IT('Não sair da linha (cortar caminho)',!TUT.f.off,1)]},
+ {n:'Cruzamento com marcador verde',objs:()=>[...Poly([[-108,0],[0,0]]),Lg(0,-60,0,60),{t:'tape',x:-6,z:-4,w:4,d:5.5,c:'#1fa34a'},GOALO(0,-60)],
+  txt:'Um quadrado <b>verde</b> ao lado da linha indica para que lado virar no cruzamento. Use dois sensores para ler o verde e vire para o lado do quadrado até chegar à área amarela.',
+  hint:'Quando um sensor vê verde, guarde o lado numa variável. No cruzamento, vire para esse lado e volte a seguir a linha. Teste o bloco "sensor de cor vê verde".',
+  tick:()=>{if(sim.running&&lineDist()>16)TUT.f.off=1;},
+  items:()=>[IT('Dois sensores de cor montados',RB.sens.length>=2),IT('Virar para o lado do verde e chegar à área amarela',TUT.f.goal),IT('Não sair da linha (cortar caminho)',!TUT.f.off,1)]},
+ {n:'Obstáculo na linha',objs:()=>[Lg(-108,0,98,0),{t:'wall',x:0,z:0,rot:0,len:12,th:12,h:12,col:0x374151},GOALO(98,0)],
+  txt:'Há um bloco no meio da linha. Detecte-o com o <b>ultrassônico</b>, desvie, volte para a linha e chegue à área amarela sem bater.',
+  hint:'Quando a distância for menor que uns 12 cm: pare, vire, ande de lado, vire de volta, passe pelo obstáculo e procure a linha de novo com o sensor.',
+  items:()=>[IT('Sensor ultrassônico montado no robô',RB.ultra),IT('Chegar à área amarela',TUT.f.goal),IT('Sem bater no obstáculo ou nas paredes',!sim.c.hit,1)]},
+ {n:'Subir a rampa',objs:()=>[Lg(-108,0,90,0),{t:'ramp',x:-45,z:0,rot:0},{t:'wall',x:105,z:-15,rot:Math.PI/2},{t:'wall',x:105,z:15,rot:Math.PI/2},GOALO(88,0)],
+  txt:'A rampa exige motores fortes e centro de massa baixo. Suba a rampa, chegue à área amarela, sem tombar.',
+  hint:'Se o robô tombar ou patinar: use mais rodas/motores, deixe as peças pesadas embaixo, coloque o rodízio e reduza a velocidade. A aba Montar robô mostra a inclinação máxima.',
+  items:()=>[IT('Subir a rampa',sim.c.ramp),IT('Chegar à área amarela',TUT.f.goal),IT('Sem bater nas paredes',!sim.c.hit,1),IT('Sem tombar',!sim.c.tomb,1)]},
+ {n:'Desafio completo',custom:()=>demo(),
+  txt:'Suba a rampa, chegue à área verde, empurre as 3 bolinhas para fora dela, vá até o ponto final amarelo e pare antes da parede.',
+  hint:'Planeje o programa por etapas: seguir a linha até a rampa, subir, entrar na área verde, empurrar as bolinhas com o corpo do robô e seguir até o ponto final.',
+  items:()=>{const c=sim.c;return[IT('Subir a rampa',c.ramp),IT('Chegar à área verde',c.green),IT('Empurrar as bolinhas para fora',c.balls),IT('Parar no ponto final',c.end),IT('Sem bater na parede',!c.hit,1),IT('Sem tombar',!c.tomb,1)];}},
+ {n:'Resgate com garra',custom:()=>rescueArena(true),
+  txt:'Adicione a <b>garra com servo</b> na frente do robô (camada de baixo, com espaço livre à frente), pegue um cubo e leve-o até a zona azul.',
+  hint:'Abra a garra, ande até "objeto entre os dedos da garra?", feche a garra, leve até a zona azul e solte lá dentro.',
+  items:()=>[IT('Garra montada no robô',RB.claw),IT('Pegar um cubo com a garra',TUT.f.claw),IT('Levar um cubo até a zona azul',score()>=1)]}
+];
+/* peças e blocos liberados por fase */
+const MINP={block:1,wheel:1,caster:1,battery:1,color:4,ultra:5,gyro:10,claw:11},TBMIN={'Sensores':4,'Operadores':5,'Variáveis':7,'Garra':11},
+  BMIN={cor_ve:4,cor_luz:4,cor_analog:4,timer_get:4,timer_reset:4,ultra:5,gyro:10,score:10,speed:10};
+function tbFor(L){return{kind:'categoryToolbox',contents:TB.contents.filter(c=>L>=(TBMIN[c.name]||0)).map(c=>c.contents?Object.assign({},c,{contents:c.contents.filter(b=>L>=(BMIN[b.type]||0))}):c)};}
+function tutUI(){const on=TUT.on;$('tut').style.display=on?'block':'none';
+  document.querySelector('[data-mode="arena"]').style.display=on?'none':'';
+  $('defbot').style.display=$('clawbot').style.display=on?'none':'';
+  document.querySelectorAll('[data-part]').forEach(b=>{const m=MINP[b.dataset.part];b.style.display=(on&&m&&TUT.lvl<m)?'none':'';});
+  if(on&&MINP[partTool]&&TUT.lvl<MINP[partTool]){partTool='block';document.querySelectorAll('[data-part]').forEach(x=>x.classList.toggle('on',x.dataset.part==='block'));}
+  $('tutBtn').textContent=on?'🆓 Modo livre':'🎓 Tutorial';
+  try{ws.updateToolbox(on?tbFor(TUT.lvl):TB);}catch(e){}}
+function tutList(){const it=LV[TUT.lvl-1].items();
+  $('tutL').innerHTML=it.map(x=>'<div class="'+(x.d&&!x.neg?'ok':'')+'">'+(x.neg?(x.d?'○':'✖'):(x.d?'✔':'☐'))+' '+x.t+'</div>').join('');return it;}
+function tutRender(){const L=LV[TUT.lvl-1];$('tutT').textContent='Fase '+TUT.lvl+'/'+LV.length+' — '+L.n;
+  const s=$('tutSel');s.replaceChildren();for(let i=1;i<=Math.min(TUT.max,LV.length);i++)s.add(new Option('Fase '+i+' — '+LV[i-1].n,i));s.value=TUT.lvl;
+  $('tutChk').style.display=TUT.lvl===1?'':'none';$('tutD').innerHTML=L.txt+(TUT.hint?'<div class="hint">💡 '+L.hint+'</div>':'');tutList();}
+function loadLevel(n){n=Math.max(1,Math.min(LV.length,(n|0)||1));const L=LV[n-1];
+  TUT.on=true;TUT.lvl=n;TUT.max=Math.max(TUT.max,n);TUT.pause=false;TUT.hint=false;TUT.f={};sim.running=false;OBR.on=false;
+  if(L.custom)L.custom();else{setArena(120,80);objs=L.objs().map(o=>Object.assign({},o));Object.assign(START,{x:-108,z:0,a:0});sel=null;touch();}
+  tutUI();setMode(L.lm||'sim');tutRender();status('Fase '+n+': '+L.n+'. Leia o objetivo no painel acima.');}
+function tutToggle(on){if(on){loadLevel(TUT.lvl);return;}TUT.on=false;TUT.pause=false;tutUI();setMode(mode==='build'?'build':'sim');
+  status('Modo livre: Arena e sala da OBR liberadas. Clique em 🎓 Tutorial para voltar às fases.');}
+function tutBox(title,msg,btns){const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:70';
+  const b=document.createElement('div');b.style.cssText='background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:18px;max-width:min(92vw,430px);display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-lg)';
+  const h=document.createElement('div');h.style.cssText='font-size:20px;font-weight:700;color:var(--ink-dark)';h.textContent=title;
+  const t=document.createElement('div');t.textContent=msg;const r=document.createElement('div');r.style.cssText='display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap';
+  btns.forEach((x,i)=>{const k=document.createElement('button');k.textContent=x[0];if(i===btns.length-1)k.className='pri';k.onclick=()=>{o.remove();x[1]();};r.appendChild(k);});
+  b.append(h,t,r);o.appendChild(b);document.body.appendChild(o);}
+function tutWin(){const n=TUT.lvl,save=' Dica: salve seu robô em arquivo (💾) para continuar depois.';
+  if(n>=LV.length){TUT.max=LV.length;tutBox('🏆 Tutorial concluído!','Parabéns! Você criou, programou e testou seu robô em todas as fases.'+save+' No Modo livre você pode criar arenas e gerar a sala da OBR.',[['Repetir esta fase',()=>loadLevel(n)],['Ir para o Modo livre',()=>tutToggle(false)]]);}
+  else{TUT.max=Math.max(TUT.max,n+1);tutBox('🎉 Fase '+n+' concluída!','Próxima: Fase '+(n+1)+' — '+LV[n].n+'. O mapa será carregado automaticamente.'+save,[['Repetir esta fase',()=>loadLevel(n)],['Próxima fase ▶',()=>loadLevel(n+1)]]);}}
+let tutN=0;
+function tutTick(){if(!TUT.on)return;$('hudL').style.display='none';if(TUT.pause)return;const L=LV[TUT.lvl-1];
+  if(mode==='sim'){const gg=objs.find(o=>o.t==='goal');if(gg&&Math.abs(bot.x-gg.x)<gg.w/2&&Math.abs(bot.z-gg.z)<gg.d/2)TUT.f.goal=1;if(L.tick)L.tick();if(objs.some(o=>isP(o)&&o.held))TUT.f.claw=1;}
+  const it=(++tutN%6===0)?tutList():L.items();
+  if(!L.manual&&it.length&&it.every(x=>x.d)&&mode===(L.lm||'sim')){TUT.pause=true;sim.running=false;bot.l=bot.r=0;tutWin();}}
+$('tutSel').onchange=e=>loadLevel(+e.target.value);
+$('tutHint').onclick=()=>{TUT.hint=!TUT.hint;tutRender();};
+$('tutRst').onclick=()=>loadLevel(TUT.lvl);
+$('tutClr').onclick=()=>{ws.clear();status('Blocos limpos.');};
+$('tutChk').onclick=()=>{if(!TUT.on||TUT.lvl!==1||TUT.pause)return;const bad=tutList().filter(x=>!x.d);
+  if(bad.length){status('Robô ainda não é viável.');tutBox('Robô incompleto','Ainda falta: '+bad.map(x=>x.t.toLowerCase()).join('; ')+'.',[['Voltar a montar',()=>{}]]);return;}
+  const T=tilt(0,0,0);if(T){status('Robô instável.');tutBox('Robô instável',tipMsg(T),[['Voltar a montar',()=>{}]]);return;}
+  TUT.pause=true;tutWin();};
+$('tutBtn').onclick=()=>tutToggle(!TUT.on);
+
+/* ---------- Salvar / abrir robô em arquivo (.robosim) ---------- */
+const slug=s=>(s||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'meu-robo';
+function saveRobot(){const name=$('rnm').value.trim()||'Meu robô',fn=slug(name)+'.robosim';
+  const data={app:'RoboSim3D',versao:1,nome:name,fase:TUT.lvl,faseMaxima:TUT.max,pecas:parts,frente:FR,blocos:Blockly.serialization.workspaces.save(ws),salvoEm:new Date().toISOString()};
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download=fn;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);status('Robô salvo no arquivo "'+fn+'" (pasta Downloads). Use 📂 Abrir robô para continuar depois.');}
+function loadRobotData(o,fn){if(!o||o.app!=='RoboSim3D'||!Array.isArray(o.pecas))throw new Error('formato');
+  sim.running=false;FR=((o.frente|0)%4+4)%4;parts=o.pecas.filter(p=>p&&MS[p.t]!==undefined).map(p=>({t:p.t,i:p.i|0,j:p.j|0,k:p.k|0}));dropOrphans();hist.length=0;msel=null;
+  for(const k in VARS)delete VARS[k];ws.clear();if(o.blocos)Blockly.serialization.workspaces.load(o.blocos,ws);
+  $('rnm').value=o.nome||'';TUT.max=Math.max(TUT.max,o.faseMaxima|0,o.fase|0);
+  if(TUT.on)loadLevel(o.fase|0||1);else{buildRobot();resetBot();}
+  status('Robô "'+(o.nome||fn)+'" carregado'+(TUT.on?' — continuando na fase '+TUT.lvl+'.':'.'));}
+$('rbSave').onclick=saveRobot;$('rbOpen').onclick=()=>$('rbFile').click();
+$('rbFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{loadRobotData(JSON.parse(r.result),f.name);}catch(x){status('Arquivo inválido: escolha um arquivo .robosim salvo por este simulador.');}};r.readAsText(f);};
+
 function fit(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();}
 new ResizeObserver(fit).observe(view);
-defBot();demo();refresh();setMode('sim');fit();requestAnimationFrame(frame);
+buildRobot();refresh();loadLevel(1);fit();requestAnimationFrame(frame);
 </script>
 </body>
 </html>
