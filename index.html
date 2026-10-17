@@ -257,19 +257,6 @@ main {
 #hudL { left: 12px; }
 #hudR { right: 12px; }
 
-#js {
-  width: 100%;
-  height: 44px;
-  box-sizing: border-box;
-  font: 13px monospace;
-  background: var(--bg);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 8px;
-  resize: vertical;
-}
-
 /* Custom Scrollbar for modern look */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -277,14 +264,39 @@ main {
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* --- TUTORIAL --- */
-#tut{padding:10px 16px;border-bottom:1px solid var(--line);background:var(--soft);max-height:215px;overflow:auto;font-size:14px}
+#tut{padding:10px 16px 12px;border-bottom:1px solid var(--line);border-left:5px solid var(--acc);background:var(--soft);font-size:14px}
 #tut .tt{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:16px;font-weight:700;color:var(--ink-dark)}
-#tut .tt select{padding:3px 8px;font-size:13px}
-#tut .hint{margin-top:6px;padding:6px 10px;border-left:3px solid var(--warn);background:var(--panel);border-radius:6px}
-#tutL{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:2px 12px;margin-top:6px}
+#tut .tt button,#tut .tt select{padding:4px 10px;font-size:13px}
+#tutFold{width:30px;padding:2px 0!important}
+#tutDots{display:inline-flex;gap:3px;align-items:center}
+#tutDots i{width:9px;height:9px;border-radius:50%;background:var(--line);display:inline-block}
+#tutDots i.d{background:var(--run)}#tutDots i.c{background:var(--acc);box-shadow:0 0 0 2px var(--soft),0 0 0 3px var(--acc)}
+#tut .tb{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:10px 16px;margin-top:8px;align-items:start}
+#tut.fold .tb{display:none}
+#tut .hint{margin-top:8px;padding:6px 10px;border-left:3px solid var(--warn);background:var(--panel);border-radius:6px}
+#tutL{display:flex;flex-direction:column;gap:3px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
 #tut .ok{color:#16a34a;font-weight:700}
-#tut .ar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
-#tut button,#tut input[type=text]{padding:4px 10px;font-size:13px}
+@media (max-width:1150px){#tut .tb{grid-template-columns:1fr}}
+#rowFiles .grp{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:4;padding:20px;text-align:center}
+#empty .eb{background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:14px;padding:18px 28px;box-shadow:var(--shadow-lg);max-width:min(90%,520px);display:flex;flex-direction:column;gap:6px}
+#empty b{font-size:clamp(20px,3vw,32px);color:var(--ink-dark)}
+#empty span{color:var(--mute);font-size:14px}
+@media (prefers-color-scheme: dark){#empty .eb{background:rgba(30,41,59,.92)}}
+/* --- blocos recolhíveis --- */
+main{transition:grid-template-columns .25s ease}
+main.cl{grid-template-columns:52px 1fr}
+main.cl>.card:first-child #blocks,main.cl #tutClr,main.cl>.card:first-child .sp{display:none}
+main.cl>.card:first-child .ct{flex-direction:column;align-items:center;padding:10px 0;height:100%;box-sizing:border-box}
+main.cl .ctl{writing-mode:vertical-rl;white-space:nowrap}
+#blkFold{padding:2px 9px;font-size:13px}
+@media (max-width:900px){
+  main.cl{grid-template-columns:1fr;grid-auto-rows:auto}
+  main.cl>.card:first-child{min-height:54px;flex:none}
+  main.cl>.card:first-child .ct{flex-direction:row;height:auto}
+  main.cl .ctl{writing-mode:horizontal-tb}
+  main.cl>.card:last-child{min-height:440px}
+}
 </style>
 </head>
 <body>
@@ -310,25 +322,21 @@ main {
 </header>
 <main>
   <section class="card">
-    <div class="ct">🧩 Programação em blocos</div>
+    <div class="ct"><button id="blkFold" title="Recolher blocos">◀</button><span class="ctl">🧩 Programação em blocos</span><span class="sp"></span><button id="tutClr" title="Apagar todos os blocos">🧹 Limpar blocos</button></div>
     <div id="blocks"></div>
   </section>
   <section class="card">
     <div id="tut">
-      <div class="tt"><span id="tutT"></span><select id="tutSel"></select></div>
-      <div id="tutD"></div>
-      <div id="tutL"></div>
-      <div class="ar">
+      <div class="tt">
+        <button id="tutFold" title="Recolher/expandir instruções">▾</button>
+        <span id="tutT"></span><span id="tutDots"></span>
+        <select id="tutSel"></select>
+        <span class="sp"></span>
         <button id="tutHint">💡 Dica</button>
         <button id="tutChk" class="pri">✅ Verificar robô</button>
         <button id="tutRst">🔁 Recomeçar fase</button>
-        <button id="tutClr">🧹 Limpar blocos</button>
-        <span class="sp"></span>
-        <input type="text" id="rnm" placeholder="Nome do robô" size="16">
-        <button id="rbSave" class="pri">💾 Salvar robô</button>
-        <button id="rbOpen">📂 Abrir robô</button>
-        <input type="file" id="rbFile" accept=".robosim,.json,application/json" style="display:none">
       </div>
+      <div class="tb"><div id="tutD"></div><div id="tutL"></div></div>
     </div>
     <div class="row" id="rowBuild" style="display:none">
       <b>🧱 Peças:</b>
@@ -349,6 +357,11 @@ main {
       <button id="undo">↩️ Desfazer</button>
       <label>🧭 Frente <select id="frontSel"><option value="0">↑ topo da tela</option><option value="1">→ direita</option><option value="2">↓ baixo</option><option value="3">← esquerda</option></select></label>
       <label><input type="checkbox" id="lbl" checked> Rótulos</label>
+      <span class="sp"></span>
+      <input type="text" id="rnm" placeholder="Nome do robô" size="14">
+      <button id="rbSave" class="pri">💾 Salvar robô</button>
+      <button id="rbOpen">📂 Abrir robô</button>
+      <input type="file" id="rbFile" accept=".robosim,.json,application/json" style="display:none">
     </div>
     
     <div class="row" id="rowArena" style="display:none">
@@ -395,24 +408,27 @@ main {
       <button id="obrSol">💡 Exemplo solução</button>
     </div>
 
-    <div id="view"><div id="hudL" class="hud"></div><div id="hudR" class="hud"></div></div>
+    <div id="view"><div id="hudL" class="hud"></div><div id="hudR" class="hud"></div><div id="empty"><div class="eb"><b>Crie ou Importe seu Robô e Arena</b><span>Monte o robô na aba 🔧 Montar robô (ou abra um arquivo .robosim) e abra uma arena com 📂 Abrir arena, abaixo.</span></div></div></div>
     
     <div class="st" id="st">Pronto.</div>
     <div class="st" id="sn"></div>
     
-    <div class="row">
-      <input type="text" id="nm" placeholder="Nome do projeto" size="20">
-      <button id="save" class="pri">💾 Salvar</button>
-      <span class="sp"></span>
-      <select id="lst"></select>
-      <button id="load">📂 Abrir</button>
-      <button id="rm">🗑️ Apagar</button>
-      <button id="exp">📄 Gerar JSON</button>
-      <button id="imp">📥 Carregar JSON</button>
-    </div>
-    
-    <div class="row" style="background: var(--bg); border-top: 1px solid var(--line);">
-      <textarea id="js" placeholder="Cole aqui o JSON do projeto (robô + arena) para carregar..."></textarea>
+    <div class="row" id="rowFiles">
+      <span class="grp" id="grpArena">
+        <b>🗺️ Arena:</b>
+        <input type="text" id="anm" placeholder="Nome da arena" size="14">
+        <button id="arSave" class="pri">💾 Salvar arena</button>
+        <button id="arOpen">📂 Abrir arena</button>
+        <input type="file" id="arFile" accept=".arena,.json,application/json" style="display:none">
+      </span>
+      <span class="grp" id="grpProj" style="display:none">
+        <b>🗂️ Projetos no navegador (robô + arena):</b>
+        <input type="text" id="nm" placeholder="Nome do projeto" size="14">
+        <button id="save">💾 Salvar</button>
+        <select id="lst"></select>
+        <button id="load">📂 Abrir</button>
+        <button id="rm">🗑️ Apagar</button>
+      </span>
     </div>
   </section>
 </main>
@@ -833,7 +849,7 @@ function frame(){if(mode!=='build'){for(let k=0;k<sim.speed;k++){
     if(sim.running){try{if(sim.gen.next().done){sim.running=false;bot.l=bot.r=0;status('Programa terminou.');}}catch(e){sim.running=false;bot.l=bot.r=0;status('Erro no programa: '+e.message);}}
     if(mode==='sim'){phys();check();}}
   poseRobot();$('sn').textContent='Sensores de cor: '+(RB.sens.map((_,i)=>'SC'+(i+1)+'='+S.light(i+1)).join('  ')||'nenhum')+'  |  ultrassônico: '+S.ultra()+' cm  |  vítimas na zona: '+score()+'  |  massa: '+Math.round(RB.m*1000)+' g  |  velocidade: '+Math.round(bot.v*100)+' cm/s'+chkTxt()+varTxt()+obrTxt();}
-  if(mode==='build')$('sn').textContent=massTxt();hudTick();tutTick();controls.update();renderer.render(scene,camera);requestAnimationFrame(frame);}
+  if(mode==='build')$('sn').textContent=massTxt();hudTick();tutTick();emptyUI();controls.update();renderer.render(scene,camera);requestAnimationFrame(frame);}
 $('run').onclick=()=>{const s=ws.getTopBlocks(false).find(b=>b.type==='start');
   if(!s){status('Adicione o bloco "quando o robô iniciar".');return;}
   if(!RB.ok){status('Monte o robô com rodas dos dois lados (aba Montar robô).');return;}
@@ -843,7 +859,7 @@ $('reset').onclick=()=>{sim.running=false;resetBot();status('Robô e vítimas na
 $('spd').onchange=e=>sim.speed=+e.target.value;
 
 /* ---------- Abas ---------- */
-function setMode(m){mode=m;if(m==='build'&&!parts.length)FR=2;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+function setMode(m){mode=m;filesUI();if(m==='build'&&!parts.length)FR=2;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
   $('rowBuild').style.display=m==='build'?'flex':'none';$('rowArena').style.display=m==='arena'?'flex':'none';$('rowObr').style.display=m==='arena'?'flex':'none';grid.visible=m==='build';
   if(m==='build'){sim.running=false;camera.position.set(0,40,28);}else{camera.position.set(0,AZ*2.1,AZ*1.5);if(!sim.running)resetBot();}
   bplane.visible=m==='build';floor.visible=m!=='build';objG.visible=m!=='build';hov.visible=false;
@@ -1144,8 +1160,6 @@ $('save').onclick=()=>{const n=$('nm').value.trim()||'Meu projeto',t=getT();t[n]
   try{localStorage.setItem('proj3',JSON.stringify(t));status('Projeto "'+n+'" salvo neste navegador.');}catch(e){status('Não foi possível salvar aqui. Use o JSON.');}refresh();};
 $('load').onclick=()=>{const t=getT(),n=$('lst').value;if(t[n]){unpack(t[n]);$('nm').value=n;status('Projeto "'+n+'" aberto.');}};
 $('rm').onclick=()=>{const t=getT(),n=$('lst').value;if(t[n]){delete t[n];try{localStorage.setItem('proj3',JSON.stringify(t));}catch(e){}refresh();}};
-$('exp').onclick=()=>{$('js').value=pack();$('js').select();try{navigator.clipboard.writeText($('js').value);}catch(e){}status('JSON gerado. Copie e guarde.');};
-$('imp').onclick=()=>{try{unpack(JSON.parse($('js').value));status('Projeto carregado do JSON.');}catch(e){status('JSON inválido.');}};
 
 /* ---------- Menu do botão direito nos blocos ---------- */
 const lastOf=c=>{while(c.getNextBlock())c=c.getNextBlock();return c;};
@@ -1240,9 +1254,11 @@ function tutUI(){const on=TUT.on;$('tut').style.display=on?'block':'none';
   try{ws.updateToolbox(on?tbFor(TUT.lvl):TB);}catch(e){}}
 function tutList(){const it=LV[TUT.lvl-1].items();
   $('tutL').innerHTML=it.map(x=>'<div class="'+(x.d&&!x.neg?'ok':'')+'">'+(x.neg?(x.d?'○':'✖'):(x.d?'✔':'☐'))+' '+x.t+'</div>').join('');return it;}
-function tutRender(){const L=LV[TUT.lvl-1];$('tutT').textContent='Fase '+TUT.lvl+'/'+LV.length+' — '+L.n;
+function tutRender(){const L=LV[TUT.lvl-1];$('tutT').textContent='Fase '+TUT.lvl+'/'+LV.length+' — '+L.n;$('tutDots').innerHTML=LV.map((x,i)=>'<i class="'+(i+1<TUT.lvl?'d':i+1===TUT.lvl?'c':'')+'" title="Fase '+(i+1)+'"></i>').join('');
   const s=$('tutSel');s.replaceChildren();for(let i=1;i<=Math.min(TUT.max,LV.length);i++)s.add(new Option('Fase '+i+' — '+LV[i-1].n,i));s.value=TUT.lvl;
   $('tutChk').style.display=TUT.lvl===1?'':'none';$('tutD').innerHTML=L.txt+(TUT.hint?'<div class="hint">💡 '+L.hint+'</div>':'');tutList();}
+function filesUI(){const b=mode==='build';$('grpArena').style.display=b?'none':'flex';$('grpProj').style.display=b?'flex':'none';}
+let emptyOn=null;function emptyUI(){const sh=mode==='sim'&&!parts.length&&!objs.length;if(sh)$('hudR').style.display='none';if(sh!==emptyOn){emptyOn=sh;$('empty').style.display=sh?'flex':'none';}}
 function loadLevel(n){n=Math.max(1,Math.min(LV.length,(n|0)||1));const L=LV[n-1];
   TUT.on=true;TUT.lvl=n;TUT.max=Math.max(TUT.max,n);TUT.pause=false;TUT.hint=false;TUT.f={};sim.running=false;OBR.on=false;
   if(L.custom)L.custom();else{setArena(120,80);objs=L.objs().map(o=>Object.assign({},o));Object.assign(START,{x:-108,z:0,a:0});sel=null;touch();}
@@ -1285,13 +1301,29 @@ function loadRobotData(o,fn){if(!o||o.app!=='RoboSim3D'||!Array.isArray(o.pecas)
   $('rnm').value=o.nome||'';TUT.max=Math.max(TUT.max,o.faseMaxima|0,o.fase|0);
   if(TUT.on)loadLevel(o.fase|0||1);else{buildRobot();resetBot();}
   status('Robô "'+(o.nome||fn)+'" carregado'+(TUT.on?' — continuando na fase '+TUT.lvl+'.':'.'));}
+function dlFile(fn,data){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);}
+function saveArena(){const name=$('anm').value.trim()||'Minha arena',fn=slug(name)+'.arena';
+  dlFile(fn,{app:'RoboSim3D',tipo:'arena',versao:1,nome:name,arena:[AX,AZ],inicio:{x:START.x,z:START.z,a:START.a},objetos:objs,salvoEm:new Date().toISOString()});
+  status('Arena salva no arquivo "'+fn+'" (pasta Downloads). Use 📂 Abrir arena para carregar de novo.');}
+function loadArenaData(o,fn){if(!o||o.app!=='RoboSim3D'||o.tipo!=='arena'||!Array.isArray(o.objetos))throw new Error('formato');
+  const wasTut=TUT.on;if(wasTut){TUT.on=false;TUT.pause=false;tutUI();}
+  const ar=(o.arena||[]).map(Number),ok=ar.length===2&&ar.every(v=>v>=40&&v<=400);
+  sim.running=false;OBR.on=false;setArena(...(ok?ar:[120,80]));objs=o.objetos.filter(x=>x&&typeof x.t==='string');
+  {const ini=o.inicio||{},nv=(v,d)=>Number.isFinite(+v)&&v!==null&&v!==undefined?+v:d;Object.assign(START,{x:nv(ini.x,-100),z:nv(ini.z,0),a:nv(ini.a,0)});}
+  sel=null;touch();resetBot();$('anm').value=o.nome||'';status('Arena "'+(o.nome||fn)+'" carregada.'+(wasTut?' O tutorial foi pausado: você está no Modo livre (🎓 Tutorial volta às fases).':''));}
+$('arSave').onclick=saveArena;$('arOpen').onclick=()=>$('arFile').click();
+$('arFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{loadArenaData(JSON.parse(r.result),f.name);}catch(x){status('Arquivo inválido: escolha um arquivo .arena salvo por este simulador.');}};r.readAsText(f);};
+$('tutFold').onclick=()=>{const t=$('tut'),f=t.classList.toggle('fold');$('tutFold').textContent=f?'▸':'▾';setTimeout(fit,0);};
+$('blkFold').onclick=()=>{const m=document.querySelector('main'),c=m.classList.toggle('cl'),rs=()=>{try{Blockly.svgResize(ws);}catch(e){}fit();};
+  $('blkFold').textContent=c?'▶':'◀';$('blkFold').title=c?'Expandir blocos':'Recolher blocos';rs();setTimeout(rs,300);};
 $('rbSave').onclick=saveRobot;$('rbOpen').onclick=()=>$('rbFile').click();
 $('rbFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();
   r.onload=()=>{try{loadRobotData(JSON.parse(r.result),f.name);}catch(x){status('Arquivo inválido: escolha um arquivo .robosim salvo por este simulador.');}};r.readAsText(f);};
 
 function fit(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();}
 new ResizeObserver(fit).observe(view);
-buildRobot();refresh();loadLevel(1);fit();requestAnimationFrame(frame);
+buildRobot();refresh();loadLevel(1);setMode('sim');fit();requestAnimationFrame(frame);
 </script>
 </body>
 </html>
