@@ -626,7 +626,7 @@ const S={light(n){const s=RB.sens[n-1];if(!s)return 100;let v=lum(...wp(s.lat,s.
   color(n,c){const s=RB.sens[n-1];if(!s)return false;const[x,z]=wp(s.lat,s.f),v=rgb(x,z),g=v[1]>v[0]+40&&v[1]>v[2]+40,k=lum(x,z)<35,bl=v[2]>v[0]+40&&v[2]>v[1]+10,rd=v[0]>v[1]+60&&v[0]>v[2]+60,sv=!g&&!bl&&!rd&&!k&&Math.abs(v[0]-v[1])<14&&Math.abs(v[1]-v[2])<18&&lum(x,z)>55&&lum(x,z)<90;return c==='G'?g:c==='B'?k&&!g:c==='A'?bl:c==='R'?rd:c==='S'?sv:!g&&!k&&!bl&&!rd&&!sv;},
   ultra(m){if(!RB.ultra)return 400;const p=wp(RB.ultra.lat,RB.ultra.f);let best=400;
     for(const da of[-.13,0,.13]){const c=Math.cos(bot.a+da),s=Math.sin(bot.a+da);
-      for(let d=0;d<best;d++){const X=p[0]+c*d,Z=p[1]+s*d;if(inWall(X,Z)||(m==='A'&&objs.some(o=>isP(o)&&!o.held&&Math.hypot(X-o.x,Z-o.z)<rad(o)))){best=d;break;}}}
+      for(let d=0;d<best;d++){const X=p[0]+c*d,Z=p[1]+s*d;if(inWall(X,Z)||(m!=='W'&&objs.some(o=>isP(o)&&!o.held&&Math.hypot(X-o.x,Z-o.z)<rad(o)))){best=d;break;}}}
     let r=Math.max(2,best);if(noiseOn&&best<400)r+=(Math.random()+Math.random()+Math.random()-1.5)*.5;return Math.round(r*10)/10;},score};
 
 /* ---------- Blocos ---------- */
@@ -664,7 +664,8 @@ Blockly.defineBlocksWithJsonArray([
  {type:'cor_analog',message0:'ler sensor de luz analógico %1 (0 a 1023)',args0:[dd('N',NS)],output:'Number',style:'sensor'},
  {type:'timer_get',message0:'obter o valor do temporizador',output:'Number',style:'sensor'},
  {type:'timer_reset',message0:'Resetar temporizador',previousStatement:null,nextStatement:null,style:'sensor'},
- {type:'ultra',message0:'obter a distância do sensor ultra-sônico US1 (cm) | alvo %1',args0:[dd('A',[['só paredes','W'],['paredes e vítimas','A']])],output:'Number',style:'sensor'},
+ {type:'ultra',message0:'obter a distância do sensor ultra-sônico US1 (cm)',output:'Number',style:'sensor'},
+ {type:'ultra_w',message0:'distância US1 só das paredes (cm) — usado só no exemplo da OBR',output:'Number',style:'sensor'},
  {type:'gyro',message0:'ângulo do giroscópio (-180 a 180)',output:'Number',style:'sensor'},
  {type:'variables_get',message0:'%1',args0:[{type:'field_variable',name:'VAR',variable:'item'}],output:null,style:'variables'},
  {type:'variables_set',message0:'mude %1 para %2',args0:[{type:'field_variable',name:'VAR',variable:'item'},{type:'input_value',name:'VALUE'}],previousStatement:null,nextStatement:null,style:'variables'},
@@ -723,7 +724,7 @@ function ev(b){if(!b)return 0;const v=n=>ev(b.getInputTargetBlock(n)),f=n=>b.get
    case 'math_number':return +f('NUM')||0;case 'variables_get':{const x=VARS[f('VAR')];return x===undefined?0:x;}
    case 'cor_ve':return S.color(+f('N'),f('C'));
    case 'cor_luz':return S.light(+f('N'));
-   case 'ultra':return S.ultra(f('A'));
+   case 'ultra':return S.ultra();case 'ultra_w':return S.ultra('W');
    case 'gyro':{if(!RB.gyro)return 0;const d=(bot.a-START.a)*57.2958;return Math.round((((d+180)%360)+360)%360-180);}
    case 'score':return score();case 'claw_see':return !!pocketVic();case 'claw_hold':return objs.some(o=>isP(o)&&o.held);
    case 'claw_kind':{const p=objs.find(o=>isP(o)&&o.held)||pocketVic();return !!p&&p.kind===f('K');}
@@ -997,7 +998,7 @@ function hudTick(){if(++hudN%6)return;const HL=$('hudL'),HR=$('hudR');
     fm=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'),t=OBR.on?OBR.t:sim.time;
   let h='<b>Robô e sensores</b><br>Tempo: '+fm(t)+'<br>';
   RB.sens.forEach((s,i)=>{h+='SC'+(i+1)+': '+S.light(i+1)+' — '+cn(i+1)+'<br>';});
-  if(RB.ultra)h+='US1: '+S.ultra('W')+' cm (paredes) | '+S.ultra('A')+' cm (com vítimas)<br>';
+  if(RB.ultra)h+='US1: '+S.ultra()+' cm<br>';
   if(RB.gyro){const d=(bot.a-START.a)*57.2958;h+='Giroscópio: '+Math.round((((d+180)%360)+360)%360-180)+'°<br>';}
   h+='Motores: E '+Math.round(bot.l)+'% | D '+Math.round(bot.r)+'%<br>Velocidade: '+Math.round(bot.v*100)+' cm/s<br>';
   if(RB.claw)h+='Garra: '+Math.round(bot.ca)+'°'+(objs.some(o=>isP(o)&&o.held)?' (segurando)':'')+'<br>';
@@ -1060,7 +1061,7 @@ function buildSolucao(){
    AND=(a,b)=>B('logic',{OP:'&&'},{A:a,B:b}),OR=(a,b)=>B('logic',{OP:'||'},{A:a,B:b}),NOT=a=>B('not',{},{A:a}),
    GT=(a,b)=>CMP(a,'>',b),LT=(a,b)=>CMP(a,'<',b),EQ=(n,x)=>CMP(V(n),'=',N(x)),
    SC=(n,c)=>B('cor_ve',{N:String(n),C:c}),ANY=c=>OR(SC(1,c),SC(2,c)),
-   US=m=>B('ultra',{A:m}),TM=()=>B('timer_get'),T0=()=>B('timer_reset'),SPD=()=>B('speed'),STOP=()=>B('stop'),CL=a=>B('claw_set',{A:a}),
+   US=m=>B(m==='W'?'ultra_w':'ultra'),TM=()=>B('timer_get'),T0=()=>B('timer_reset'),SPD=()=>B('speed'),STOP=()=>B('stop'),CL=a=>B('claw_set',{A:a}),
    IFE=(c,a,b)=>B('ifelse',{},{C:c},{DO:a,ELSE:b}),IF=(c,a)=>B('if',{},{C:c},{DO:a}),MX=(l,r)=>B('motors',{},{L:l,R:r}),
    NORM=e=>OPB(MODB(OPB(e,'+',N(540)),N(360)),'-',N(180)),
    ERR=n=>NORM(OPB(B('gyro'),'-',V(n))),
@@ -1210,9 +1211,9 @@ const LV=[
   tick:()=>{if(stopped()&&!sim.c.hit&&RB.sens.some((s,i)=>S.color(i+1,'B')))TUT.f.a=1;},
   items:()=>[IT('Sensor de cor montado no robô',RB.sens.length>0),IT('Parar com um sensor sobre a fita preta',TUT.f.a),IT('Sem bater nas paredes',!sim.c.hit,1)]},
  {n:'Ultrassônico: detectar objetos',objs:()=>[WALL(55,0,60,Math.PI/2)],
-  txt:'O sensor <b>ultrassônico</b> mede a distância até os objetos. Adicione um na frente do robô e pare a <b>no máximo 20 cm</b> da parede, sem encostar.',
+  txt:'O sensor <b>ultrassônico</b> só informa a <b>distância</b> até o que estiver à frente (ele não sabe o que é). Adicione um na frente do robô e pare a <b>no máximo 20 cm</b> da parede, sem encostar.',
   hint:'Dentro de "sempre": se a distância do ultra-sônico US1 &lt; 20 então "parar motores", senão "mover para frente". Os blocos de comparação estão em Operadores.',
-  tick:()=>{if(RB.ultra&&stopped()){const d=S.ultra('W');if(d>=3&&d<=20&&!sim.c.hit)TUT.f.a=1;}},
+  tick:()=>{if(RB.ultra&&stopped()){const d=S.ultra();if(d>=3&&d<=20&&!sim.c.hit)TUT.f.a=1;}},
   items:()=>[IT('Sensor ultrassônico montado no robô',RB.ultra),IT('Parar a até 20 cm da parede',TUT.f.a),IT('Sem bater nas paredes',!sim.c.hit,1)]},
  {n:'Seguir a linha',objs:()=>[...Poly([[-108,0],[-70,0],[-45,-25],[-10,-25],[15,5],[50,5],[75,-30],[98,-30]]),GOALO(98,-30)],
   txt:'Use os sensores de cor para o robô <b>acompanhar a linha preta</b> até a área amarela. Com 2 sensores (um de cada lado da linha) fica bem mais fácil.',
