@@ -331,7 +331,21 @@ main.cl .ctl{writing-mode:vertical-rl;white-space:nowrap}
 #resbox ul.lg li{display:flex;justify-content:space-between;gap:16px;padding:2px 0}
 #flash{position:absolute;inset:0;background:rgba(220,38,38,.45);pointer-events:none;z-index:35;animation:fl 1s forwards}
 @keyframes fl{to{opacity:0}}
-#pyw{display:none;flex:1;min-height:380px;flex-direction:column;background:var(--bg)}#pyw.on{display:flex}#pyed{flex:1;min-height:200px;resize:none;border:0;outline:0;padding:12px;font:13px/1.6 ui-monospace,Menlo,Consolas,monospace;background:var(--panel);color:var(--ink);tab-size:4;white-space:pre;overflow:auto}#pyout{margin:0;max-height:96px;min-height:40px;overflow:auto;padding:6px 12px;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;border-top:1px solid var(--line);white-space:pre-wrap}#pyref{border-top:1px solid var(--line);padding:4px 12px;font-size:12px}#pyref pre{margin:6px 0;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;overflow:auto;max-height:170px}main.cl #pyw,main.cl #pyTog{display:none}
+#pyw{display:none;flex:1;min-height:380px;flex-direction:column;background:var(--bg)}#pyw.on{display:flex}#pyc{--tk:#d9480f;--tb:#9c36b5;--ta:#0c8599;--tf:#1971c2;--ts:#2b8a3e;--tc:#868e96;--tn:#c2255c;--tv:#364fc7;flex:1;min-height:200px;display:flex;overflow:hidden;background:var(--panel)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #pyc{--tk:#ff922b;--tb:#da77f2;--ta:#3bc9db;--tf:#74c0fc;--ts:#8ce99a;--tc:#868e96;--tn:#f783ac;--tv:#91a7ff}}
+:root[data-theme="dark"] #pyc{--tk:#ff922b;--tb:#da77f2;--ta:#3bc9db;--tf:#74c0fc;--ts:#8ce99a;--tc:#868e96;--tn:#f783ac;--tv:#91a7ff}
+#pyn,#pyh,#pyed{margin:0;font:13px/1.6 ui-monospace,Menlo,Consolas,monospace;tab-size:4;white-space:pre;box-sizing:border-box}
+#pyn{padding:12px 8px 30px 10px;min-width:42px;text-align:right;color:var(--mute);background:var(--bg);border-right:1px solid var(--line);overflow:hidden;user-select:none}
+#pyx{position:relative;flex:1;min-width:0}
+#pyh,#pyed{position:absolute;inset:0;padding:12px 12px 30px;border:0;overflow:auto}
+#pyh{overflow:hidden;pointer-events:none;color:var(--ink)}
+#pyed{background:transparent;color:transparent;caret-color:var(--ink);resize:none;outline:0}
+#pyed::selection{background:rgba(59,130,246,.35);color:transparent}
+.tk{color:var(--tk);font-weight:700}.tb{color:var(--tb)}.ta{color:var(--ta)}.tf{color:var(--tf);font-weight:700}.ts{color:var(--ts)}.tc{color:var(--tc);font-style:italic}.tn{color:var(--tn)}.tv{color:var(--tv)}#pyout{margin:0;max-height:96px;min-height:40px;overflow:auto;padding:6px 12px;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;border-top:1px solid var(--line);white-space:pre-wrap}#pyref{border-top:1px solid var(--line);padding:4px 12px;font-size:12px}#pyref pre{margin:6px 0;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;overflow:auto;max-height:170px}main.cl #pyw,main.cl #pyTog,main.cl #exTog{display:none}
+#exw{display:none;flex:0 0 auto;max-height:42%;overflow:auto;border-bottom:1px solid var(--line);background:var(--bg);padding:6px 12px 10px;font-size:13px;color:var(--ink)}#exw.on{display:block}
+#exw summary{cursor:pointer;padding:3px 0}#exw .gh{font-weight:700;margin:10px 0 2px;color:var(--ink-dark)}#exw .gh:first-child{margin-top:2px}
+#exw .bd{padding:2px 0 8px 26px;line-height:1.55}#exw .pr,#exw .rq{font-size:12px;color:var(--mute);margin-top:3px}#exw .dc{margin-top:4px}#exw .dc summary{font-size:12px}
+#exw details.dn>summary .t{text-decoration:line-through;color:var(--mute)}#exw input[type=checkbox]{margin-right:6px;vertical-align:middle}#exw code{font:12px ui-monospace,Menlo,Consolas,monospace;background:var(--panel);padding:1px 4px;border-radius:4px}
 </style>
 </head>
 <body>
@@ -359,9 +373,9 @@ main.cl .ctl{writing-mode:vertical-rl;white-space:nowrap}
 </header>
 <main>
   <section class="card">
-    <div class="ct"><button id="blkFold" title="Recolher blocos">◀</button><span class="ctl">🧩 Programação em blocos</span><span class="sp"></span><button id="pyTog" title="Escrever código em Python">🐍 Python</button><button id="tutClr" title="Apagar todos os blocos">🧹 Limpar blocos</button></div>
+    <div class="ct"><button id="blkFold" title="Recolher blocos">◀</button><span class="ctl">🧩 Programação em blocos</span><span class="sp"></span><button id="pyTog" title="Escrever código em Python">🐍 Python</button><button id="exTog" title="Lista de exercícios de Python">📝 Exercícios</button><button id="tutClr" title="Apagar todos os blocos">🧹 Limpar blocos</button></div>
     <div id="blocks"></div>
-    <div id="pyw"><textarea id="pyed" spellcheck="false"></textarea><pre id="pyout"></pre><details id="pyref"><summary>📖 Comandos do robô</summary><pre>mover("frente", 50)        # frente, tras, esquerda, direita (-100 a 100)
+    <div id="pyw"><div id="exw"></div><div id="pyc"><pre id="pyn" aria-hidden="true"></pre><div id="pyx"><pre id="pyh" aria-hidden="true"></pre><textarea id="pyed" spellcheck="false" wrap="off"></textarea></div></div><pre id="pyout"></pre><details id="pyref"><summary>📖 Comandos do robô</summary><pre>mover("frente", 50)        # frente, tras, esquerda, direita (-100 a 100)
 mover_por("frente", 50, 2) # move por 2 s e para
 motores(esq, dir)          # velocidade de cada motor
 parar_motores()
@@ -1245,10 +1259,37 @@ const needC=n=>{const k=+n||1;if(!RB.sens||!RB.sens[k-1])bad('O sensor de cor SC
 const needU=()=>{if(!RB.ultra)bad('O sensor ultrassônico não está montado no robô.');};
 const needG=()=>{if(!RB.gyro)bad('O giroscópio não está montado no robô.');};
 const needK=()=>{if(!RB.claw)bad('O robô não tem garra montada.');};
+const SIG={mover:['direcao','velocidade'],mover_por:['direcao','velocidade','segundos'],motores:['esquerdo','direito'],parar_motores:[],esperar:['segundos'],sensor_cor:['numero_do_sensor'],luz:['numero_do_sensor'],distancia:[],giroscopio:[],rotacao_motor:['motor'],zerar_rotacao:[],garra:['acao'],servo_garra:['graus'],garra_segurando:[],objeto_na_garra:[],vitimas:[],temporizador:[],resetar_temporizador:[]};
+function val(n,a){const sg=SIG[n]||[],E=(T,m)=>{throw new Sk.builtin[T](m);};
+ if(a.length!==sg.length)E('TypeError',n+'() precisa de '+sg.length+' argumento(s)'+(sg.length?' ('+sg.join(', ')+')':'')+', mas recebeu '+a.length+'.');
+ const num=(i,lo,hi)=>{const x=a[i];if(typeof x!=='number'||!isFinite(x))E('TypeError',n+'(): "'+sg[i]+'" deve ser um número, mas recebeu '+JSON.stringify(x)+'.');if(x<lo||x>hi)E('ValueError',n+'(): "'+sg[i]+'" deve estar entre '+lo+' e '+hi+', mas recebeu '+x+'.');};
+ const opt=(i,o)=>{if(!o.includes(a[i]))E('ValueError',n+'(): "'+sg[i]+'" deve ser '+o.map(x=>'"'+x+'"').join(' ou ')+', mas recebeu '+JSON.stringify(a[i])+'.');};
+ if(n==='mover'||n==='mover_por'){opt(0,['frente','tras','esquerda','direita']);num(1,-100,100);}
+ if(n==='mover_por')num(2,0,3600);if(n==='esperar')num(0,0,3600);
+ if(n==='motores'){num(0,-100,100);num(1,-100,100);}
+ if(n==='sensor_cor'||n==='luz'){num(0,1,4);if(!Number.isInteger(a[0]))E('ValueError',n+'(): "numero_do_sensor" deve ser inteiro (1 a 4), mas recebeu '+a[0]+'.');}
+ if(n==='rotacao_motor')opt(0,['esquerdo','direito']);
+ if(n==='garra')opt(0,['abrir','fechar']);
+ if(n==='servo_garra')num(0,0,90);}
+const lev=(a,b)=>{const d=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t;}}return d[b.length];};
+const NOMES=Object.keys(SIG).concat('print range len int float str abs min max round input while for if else elif def return import'.split(' '));
+const sug=nm=>{let best='',bd=9;for(const c of NOMES){const d=lev(nm.toLowerCase(),c);if(d<bd){bd=d;best=c;}}return bd<=Math.max(1,Math.min(3,Math.floor(nm.length/3)))?best:'';};
+function dica(m){const t=(m.match(/^(\w+):/)||[])[1]||'',x=m.toLowerCase();let d='';
+ if(t==='NameError'){const nm=(m.match(/name '([^']+)'/)||[])[1]||'',s=sug(nm);d="O nome '"+nm+"' não existe. Confira a escrita (maiúsculas e minúsculas contam) e lembre que uma variável precisa receber um valor antes de ser usada."+(s?" Você quis dizer '"+s+"'?":'');}
+ else if(/Indentation/.test(t)||/indent/.test(x))d='Indentação errada: o código dentro de if, while, for e def precisa de 4 espaços a mais (use Tab), e linhas do mesmo bloco ficam alinhadas.';
+ else if(/Parse|Syntax|Token/.test(t)||/bad input/.test(x))d='Erro de escrita: confira os dois pontos (:) no fim de if, elif, else, while, for e def; parênteses e aspas fechados; e == (comparar) no lugar de = (guardar valor).';
+ else if(t==='ZeroDivisionError')d='Houve uma divisão por zero. Confira o valor do divisor antes da conta.';
+ else if(t==='IndexError')d='Você pediu uma posição que não existe na lista. A primeira posição é a 0 e a última é len(lista) - 1.';
+ else if(t==='TypeError'&&/argument/.test(x))d='O número de argumentos está errado. Veja o que cada comando espera em 📖 Comandos do robô.';
+ else if(t==='TypeError')d='Tipos incompatíveis. Por exemplo, não dá para somar texto com número: converta com str(), int() ou float().';
+ else if(t==='ValueError')d='O valor não é aceito por esse comando. Veja os limites em 📖 Comandos do robô.';
+ else if(t==='AttributeError')d='Esse objeto não tem esse recurso. Confira o nome depois do ponto.';
+ else if(t==='RuntimeError'&&/sensor|garra|girosc/i.test(m))d='Monte a peça que falta na aba Montar robô e tente de novo.';
+ return d?'💡 '+d:'';}
 function api(){
- const def=(n,fn)=>{Sk.builtins[n]=new Sk.builtin.func(function(){const a=[...arguments].map(x=>Sk.ffi.remapToJs(x)),my=tok,go=()=>{chk(my);return py(fn(...a));};
+ const def=(n,fn)=>{Sk.builtins[n]=new Sk.builtin.func(function(){const a=[...arguments].map(x=>Sk.ffi.remapToJs(x)),my=tok;val(n,a);const go=()=>{chk(my);return py(fn(...a));};
   if(++calls>8)return Sk.misceval.promiseToSuspension(waitP(0).then(go));return go();});};
- const defW=(n,fn)=>{Sk.builtins[n]=new Sk.builtin.func(function(){const a=[...arguments].map(x=>Sk.ffi.remapToJs(x)),my=tok;chk(my);
+ const defW=(n,fn)=>{Sk.builtins[n]=new Sk.builtin.func(function(){const a=[...arguments].map(x=>Sk.ffi.remapToJs(x)),my=tok;chk(my);val(n,a);
   return Sk.misceval.promiseToSuspension(fn(...a).then(()=>{chk(my);return NONE();}));});};
  def('mover',(d,v)=>{bot.move(DIRC[d]||'F',cl(+v||0));});
  defW('mover_por',(d,v,s)=>{bot.move(DIRC[d]||'F',cl(+v||0));return waitP(s).then(()=>{bot.l=bot.r=0;});});
@@ -1262,7 +1303,7 @@ function api(){
  def('garra_segurando',()=>{needK();return objs.some(o=>isP(o)&&o.held);});def('objeto_na_garra',()=>{needK();return !!pocketVic();});
  def('vitimas',()=>score());def('temporizador',()=>Math.round((sim.time-TIM0)*100)/100);def('resetar_temporizador',()=>{TIM0=sim.time;});}
 function* gen(my){while(my===tok){calls=0;const t=sim.time;W=W.filter(w=>{if(t>=w.e){w.res();return false;}return true;});
- if(done){if(err){const m=String(err);err=null;out.textContent+='\n'+m+'\n';throw new Error(m);}return;}yield;}}
+ if(done){if(err){const m=String(err);err=null;out.textContent+='\n'+m+'\n'+(dica(m)?dica(m)+'\n':'');throw new Error(m);}return;}yield;}}
 const rd=x=>{if(Sk.builtinFiles===undefined||Sk.builtinFiles.files[x]===undefined)throw 'Arquivo não encontrado: '+x;return Sk.builtinFiles.files[x];};
 window.PYM=()=>on;
 window.pyRun=function(){
@@ -1281,6 +1322,61 @@ ed.value='# Programa em Python para o robô\nprint("Olá, robô!")\n\nmover("fre
 ed.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();document.execCommand('insertText',false,'    ');}
  else if(e.key==='Enter'){const v=ed.value,s=ed.selectionStart,ls=v.lastIndexOf('\n',s-1)+1,ln=v.slice(ls,s),ind=ln.match(/^ */)[0]+(/:\s*$/.test(ln)?'    ':'');e.preventDefault();document.execCommand('insertText',false,'\n'+ind);}});
 })();
+/* ---------- Numeração de linhas e cores do Python (estilo Thonny) ---------- */
+(function(){const ed=$('pyed'),h=$('pyh'),nn=$('pyn');
+const KW=new Set('False None True and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield'.split(' ')),
+BI=new Set('print range len int float str bool list dict set tuple abs min max sum round input type sorted enumerate zip map isinstance open'.split(' ')),
+API=new Set(['mover','mover_por','motores','parar_motores','esperar','sensor_cor','luz','distancia','giroscopio','rotacao_motor','zerar_rotacao','garra','servo_garra','garra_segurando','objeto_na_garra','vitimas','temporizador','resetar_temporizador']);
+const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const RE=/(#[^\n]*)|("""[\s\S]*?(?:"""|$)|'''[\s\S]*?(?:'''|$)|"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?)|(\b\d+(?:\.\d+)?\b)|([A-Za-z\u00C0-\u00FF_][\w\u00C0-\u00FF]*)|([\s\S])/g;
+function hl(src){let prev='',dot=false;return src.replace(RE,(m,c,s,nm,id,ch,off)=>{
+ if(c){prev='';dot=false;return '<span class="tc">'+esc(c)+'</span>';}
+ if(s){prev='';dot=false;return '<span class="ts">'+esc(s)+'</span>';}
+ if(nm){prev='';dot=false;return '<span class="tn">'+esc(nm)+'</span>';}
+ if(id){const call=/^[ \t]*\(/.test(src.slice(off+m.length,off+m.length+40)),was=prev,wd=dot;prev=id;dot=false;let k;
+  if(KW.has(id)&&!wd)k='tk';else if(was==='def'||was==='class')k='tf';else if(wd)k=call?'tf':'';else if(API.has(id))k='ta';else if(BI.has(id))k='tb';else if(call)k='tf';else k='tv';
+  return k?'<span class="'+k+'">'+esc(id)+'</span>':esc(id);}
+ if(ch==='.')dot=true;else if(!/\s/.test(ch)){dot=false;prev='';}
+ return esc(ch);});}
+const sync=()=>{h.scrollTop=nn.scrollTop=ed.scrollTop;h.scrollLeft=ed.scrollLeft;};
+const draw=()=>{const v=ed.value;h.innerHTML=hl(v)+'\n';const c=v.split('\n').length;let t='';for(let i=1;i<=c;i++)t+=i+'\n';nn.textContent=t;sync();};
+ed.addEventListener('input',draw);ed.addEventListener('scroll',sync);draw();})();
+/* ---------- Lista de exercícios de Python ---------- */
+(function(){const G1='Bloco 1 · variáveis, print e if',G2='Bloco 2 · laços e listas',G3='Bloco 3 · funções',G4='Bloco 4 · integração',G5='Desafios extras';
+const ROWS=[
+[1,G1,`Olá, robô`,`Imprima o seu nome e a distância lida pelo ultrassônico.`,`a caixa de saída mostrar os dois valores.`,`ultrassônico`,`Use <code>print('texto', valor)</code>: o que estiver separado por vírgula aparece na mesma linha.`],
+[2,G1,`Andar e parar`,`Faça o robô andar por 3 segundos e parar. Depois repita usando <code>mover_por</code> e compare as duas formas.`,`o robô fazer o mesmo trajeto nas duas versões.`,``,`Na primeira forma você precisa de <code>mover</code>, <code>esperar</code> e <code>parar_motores</code>.`],
+[3,G1,`Variável de velocidade`,`Guarde a velocidade numa variável <code>vel</code> e use-a em <code>mover</code>. Mude só o valor da variável e veja o efeito.`,`o robô mudar de velocidade alterando apenas uma linha.`,``,`<code>vel = 50</code> no início, e depois <code>mover('frente', vel)</code>.`],
+[4,G1,`Decisão simples`,`Se a distância for menor que 20 cm, imprima 'Obstáculo!' e pare. Senão, imprima 'Livre' e ande.`,`o robô parar diante de uma parede e andar quando o caminho estiver livre.`,`ultrassônico`,`Guarde a leitura numa variável com outro nome (por exemplo <code>d</code>) e use <code>if d &lt; 20:</code> ... <code>else:</code>.`],
+[5,G1,`Três caminhos`,`Use if / elif / else para imprimir o que o sensor de cor 1 vê: 'Linha', 'Verde' ou 'Outra cor'.`,`a mensagem mudar quando o robô muda de posição sobre a pista.`,`sensor de cor SC1`,`<code>sensor_cor(1) == 'preto'</code> compara o resultado com um texto; o elif testa a segunda possibilidade.`],
+[6,G2,`Quadrado`,`Faça o robô andar em formato de quadrado usando <code>for _ in range(4)</code>. Teste os tempos de reta e de curva até acertar.`,`o robô voltar perto do ponto de partida, de frente para o mesmo lado.`,``,`Dentro do for: uma reta com <code>mover_por('frente', ...)</code> e uma curva com <code>mover_por('direita', ...)</code>.`],
+[7,G2,`Contagem regressiva`,`Imprima de 5 até 1 com for e termine com 'Largada!'. Depois faça o robô andar só depois da largada.`,`a contagem aparecer na ordem certa e o robô sair só no final.`,``,`<code>for i in range(5, 0, -1):</code> conta de 5 até 1.`],
+[8,G2,`Esperar a parede`,`Com while, ande para frente até a distância ficar menor que 15 cm. Pare e imprima a distância final.`,`o robô parar antes da parede e a caixa mostrar a última leitura.`,`ultrassônico`,`Não use o nome <code>distancia</code> para a sua variável (é o nome do comando). Dentro do laço, leia, teste e use <code>esperar(0.1)</code>.`],
+[9,G2,`Lista de velocidades`,`Crie a lista [20, 40, 60, 80]. Percorra com for, andando 1 segundo em cada velocidade e imprimindo a velocidade e a rotação do motor esquerdo.`,`quatro linhas impressas, com a rotação aumentando.`,``,`<code>for v in velocidades:</code> e <code>rotacao_motor('esquerdo')</code>. Use <code>zerar_rotacao()</code> para medir cada trecho separado.`],
+[10,G2,`Média de leituras`,`Leia a distância 5 vezes (com esperar(0.2) entre elas), guarde numa lista e imprima a média.`,`a média impressa ficar próxima das leituras.`,`ultrassônico`,`<code>lista.append(valor)</code> adiciona na lista; a média é <code>sum(lista) / len(lista)</code>.`],
+[11,G3,`Função de parada`,`Crie <code>def parar_e_avisar(msg)</code>, que para os motores e imprime a mensagem. Use-a em dois lugares do programa.`,`as duas mensagens aparecerem e o robô parar nas duas vezes.`,``,`Defina a função no início do programa, antes de usá-la.`],
+[12,G3,`Função de curva`,`Crie <code>def virar(direcao, segundos)</code> e <code>def andar(segundos)</code>. Reescreva o quadrado do exercício 6 usando só essas duas funções.`,`o quadrado funcionar com o código bem mais curto.`,``,`Dentro de <code>virar</code>, repasse a direção para <code>mover_por</code>.`],
+[13,G3,`Retorno de valor`,`Crie <code>def perto(limite)</code>, que devolve True se a distância for menor que o limite. Use-a no while do exercício 8.`,`o while ficar legível, algo como <code>while not perto(15):</code>.`,`ultrassônico`,`A função termina com <code>return</code> seguido de uma comparação.`],
+[14,G3,`Missões`,`Escreva três funções (<code>missao1</code>, <code>missao2</code>, <code>missao3</code>) com movimentos curtos e chame-as em sequência.`,`o robô executar as três missões na ordem, imprimindo qual está em andamento.`,``,`É a estrutura típica de uma rodada de FLL: cada missão é uma função, e o programa principal só as chama.`],
+[15,G4,`Seguidor de linha com if`,`Use sensor_cor(1) e sensor_cor(2) para seguir a linha. Depois troque os números soltos por variáveis no começo do programa.`,`o robô seguir a pista e a velocidade mudar editando uma única linha.`,`sensores de cor SC1 e SC2`,`Se o SC1 vê preto, curve para um lado com <code>motores(10, 50)</code>; se o SC2 vê preto, para o outro; senão, siga reto.`],
+[16,G4,`Parar no obstáculo`,`No seguidor do exercício 15, pare ao detectar um obstáculo, imprima a distância e espere 2 segundos antes de continuar.`,`o robô parar diante do obstáculo e voltar a seguir a linha.`,`SC1, SC2 e ultrassônico`,`Teste a distância primeiro, dentro do laço.`],
+[17,G4,`Tempo de volta`,`Use resetar_temporizador() e temporizador() para medir quanto tempo o robô leva para cumprir uma pista e imprima o resultado.`,`o tempo impresso bater com o que você viu na simulação.`,``,`Reinicie o temporizador logo antes de o robô sair.`],
+[18,G4,`Desafio livre`,`Escolha um dos desafios do tutorial do simulador e resolva em Python, com pelo menos uma função, um laço e um print útil.`,`o desafio ser concluído e o código ficar organizado.`,``,``],
+[19,G5,`Controle proporcional`,`Em vez de motores(10, 50) fixo, calcule a correção a partir de luz(1) e multiplique por uma constante kp. Varie o kp e observe se o robô oscila ou fica lento.`,`o robô seguir a linha com curvas suaves.`,`sensor de cor SC1`,`erro = luz atual - luz desejada; correção = kp * erro. Some a correção em um motor e subtraia do outro.`],
+[20,G5,`Contador de cruzamentos`,`Conte quantas vezes o sensor vê verde durante o percurso e imprima o total.`,`o total bater com o número de marcas verdes.`,`sensor de cor SC1`,`Conte só quando a cor muda para verde (guarde a leitura anterior); senão uma marca vira várias contagens.`],
+[21,G5,`Resgate com garra`,`Ande até uma vítima, feche a garra, leve até a zona e confira com vitimas().`,`vitimas() mostrar 1 no fim.`,`garra e ultrassônico`,`Use <code>garra('abrir')</code>, <code>garra('fechar')</code> e <code>garra_segurando()</code>.`]];
+const EX=ROWS.map(r=>({id:r[0],g:r[1],t:r[2],e:r[3],p:r[4],r:r[5],d:r[6]})),KEY='robosim_ex',box=$('exw');
+let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}};
+const count=()=>{$('exN').textContent=EX.filter(x=>done[x.id]).length+' de '+EX.length+' concluídos';};
+function render(){let h='<div class="gh">📝 Lista de exercícios · <span id="exN"></span> <button id="exClr" style="margin-left:8px">Limpar progresso</button></div>',g='';
+ for(const x of EX){if(x.g!==g){g=x.g;h+='<div class="gh">'+g+'</div>';}
+  h+='<details'+(done[x.id]?' class="dn"':'')+'><summary><input type="checkbox" data-c="'+x.id+'"'+(done[x.id]?' checked':'')+'><span class="t">'+x.id+'. '+x.t+'</span></summary><div class="bd">'+x.e+'<div class="pr"><b>Pronto quando:</b> '+x.p+'</div>'+(x.r?'<div class="rq"><b>Precisa de:</b> '+x.r+'</div>':'')+(x.d?'<details class="dc"><summary>💡 Dica</summary>'+x.d+'</details>':'')+'</div></details>';}
+ box.innerHTML=h;count();}
+box.addEventListener('change',e=>{const c=e.target.dataset&&e.target.dataset.c;if(!c)return;if(e.target.checked)done[c]=1;else delete done[c];save();e.target.closest('details').classList.toggle('dn',e.target.checked);count();});
+box.addEventListener('click',e=>{if(e.target.id==='exClr'){done={};save();render();}});
+$('exTog').onclick=()=>{if(!(window.PYM&&PYM()))$('pyTog').click();const on=box.classList.toggle('on');$('exTog').classList.toggle('pri',on);};
+render();})();
 $('blkFold').onclick=()=>{const m=document.querySelector('main'),c=m.classList.toggle('cl'),rs=()=>{try{Blockly.svgResize(ws);}catch(e){}fit();};
   $('blkFold').textContent=c?'▶':'◀';$('blkFold').title=c?'Expandir blocos':'Recolher blocos';rs();setTimeout(rs,300);};
 $('rbSave').onclick=saveRobot;$('rbOpen').onclick=()=>$('rbFile').click();
