@@ -331,6 +331,7 @@ main.cl .ctl{writing-mode:vertical-rl;white-space:nowrap}
 #resbox ul.lg li{display:flex;justify-content:space-between;gap:16px;padding:2px 0}
 #flash{position:absolute;inset:0;background:rgba(220,38,38,.45);pointer-events:none;z-index:35;animation:fl 1s forwards}
 @keyframes fl{to{opacity:0}}
+#pyw{display:none;flex:1;min-height:380px;flex-direction:column;background:var(--bg)}#pyw.on{display:flex}#pyed{flex:1;min-height:200px;resize:none;border:0;outline:0;padding:12px;font:13px/1.6 ui-monospace,Menlo,Consolas,monospace;background:var(--panel);color:var(--ink);tab-size:4;white-space:pre;overflow:auto}#pyout{margin:0;max-height:96px;min-height:40px;overflow:auto;padding:6px 12px;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;border-top:1px solid var(--line);white-space:pre-wrap}#pyref{border-top:1px solid var(--line);padding:4px 12px;font-size:12px}#pyref pre{margin:6px 0;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;overflow:auto;max-height:170px}main.cl #pyw,main.cl #pyTog{display:none}
 </style>
 </head>
 <body>
@@ -358,8 +359,23 @@ main.cl .ctl{writing-mode:vertical-rl;white-space:nowrap}
 </header>
 <main>
   <section class="card">
-    <div class="ct"><button id="blkFold" title="Recolher blocos">◀</button><span class="ctl">🧩 Programação em blocos</span><span class="sp"></span><button id="tutClr" title="Apagar todos os blocos">🧹 Limpar blocos</button></div>
+    <div class="ct"><button id="blkFold" title="Recolher blocos">◀</button><span class="ctl">🧩 Programação em blocos</span><span class="sp"></span><button id="pyTog" title="Escrever código em Python">🐍 Python</button><button id="tutClr" title="Apagar todos os blocos">🧹 Limpar blocos</button></div>
     <div id="blocks"></div>
+    <div id="pyw"><textarea id="pyed" spellcheck="false"></textarea><pre id="pyout"></pre><details id="pyref"><summary>📖 Comandos do robô</summary><pre>mover("frente", 50)        # frente, tras, esquerda, direita (-100 a 100)
+mover_por("frente", 50, 2) # move por 2 s e para
+motores(esq, dir)          # velocidade de cada motor
+parar_motores()
+esperar(1.5)               # segundos
+sensor_cor(1)              # "preto" "verde" "azul" "vermelho" "prata" "branco"
+luz(1)                     # 0 a 100
+distancia()                # ultrassônico, em cm
+giroscopio()               # -180 a 180
+rotacao_motor("esquerdo")  # ou "direito";  zerar_rotacao()
+garra("abrir")             # ou "fechar";  servo_garra(0 a 90)
+garra_segurando()          # True/False;  objeto_na_garra()
+vitimas()                  # vítimas na zona de resgate
+temporizador()             # resetar_temporizador()
+print("texto", valor)      # aparece na caixa abaixo do editor</pre></details></div>
   </section>
   <section class="card">
     <div id="tut">
@@ -453,6 +469,8 @@ main.cl .ctl{writing-mode:vertical-rl;white-space:nowrap}
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/blockly_compressed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 <script>
 const $=id=>document.getElementById(id),DT=1/60,SPD=0.3,PXC=5,NI=11,NJ=13,CX=5,CY=6;
 const cl=x=>Math.max(-100,Math.min(100,+x||0)),status=t=>$('st').textContent=t;
@@ -734,7 +752,13 @@ ws.clear();
 const VARS={};let TIM0=0,noiseOn=false;
 function varTxt(){const a=ws.getAllVariables();return a.length?'  |  variáveis: '+a.map(v=>v.name+'='+(VARS[v.getId()]??0)).join('  '):'';}
 function* Wt(t){const e=sim.time+Math.max(0,+t||0);while(sim.time<e)yield;}
-function ev(b){if(!b)return 0;const v=n=>ev(b.getInputTargetBlock(n)),f=n=>b.getFieldValue(n);
+function needClaw(){if(!RB.claw)throw new Error('O robô não tem garra montada.');}
+function chkSens(b){const t=b.type;
+ if(t==='cor_ve'||t==='cor_luz'||t==='cor_analog'){const n=+b.getFieldValue('N');if(!RB.sens||!RB.sens[n-1])throw new Error('O sensor de cor SC'+n+' não está montado no robô.');}
+ else if(t==='ultra'&&!RB.ultra)throw new Error('O sensor ultrassônico não está montado no robô.');
+ else if(t==='gyro'&&!RB.gyro)throw new Error('O giroscópio não está montado no robô.');
+ else if(t==='claw_see'||t==='claw_hold'||t==='claw_kind')needClaw();}
+function ev(b){if(!b)return 0;chkSens(b);const v=n=>ev(b.getInputTargetBlock(n)),f=n=>b.getFieldValue(n);
   switch(b.type){
    case 'num':return +f('N')||0;case 'rand':{const lo=Math.ceil(Math.min(v('A'),v('B'))),hi=Math.floor(Math.max(v('A'),v('B')));return lo+Math.floor(Math.random()*(hi-lo+1));}
    case 'mod':{const a=v('A'),c=v('B');return c?((a%c)+c)%c:0;}
@@ -782,8 +806,8 @@ function* one(b){const v=n=>ev(b.getInputTargetBlock(n)),sub=n=>b.getInputTarget
    case 'repeat_until':while(!v('C')){yield* exec(sub('DO'));yield;}break;
    case 'variables_set':VARS[b.getFieldValue('VAR')]=v('VALUE');break;
    case 'math_change':VARS[b.getFieldValue('VAR')]=(+VARS[b.getFieldValue('VAR')]||0)+(+v('DELTA')||0);break;
-   case 'claw_set':bot.ct=b.getFieldValue('A')==='O'?90:0;break;
-   case 'claw_angle':bot.ct=Math.max(0,Math.min(90,+v('V')||0));break;
+   case 'claw_set':needClaw();bot.ct=b.getFieldValue('A')==='O'?90:0;break;
+   case 'claw_angle':needClaw();bot.ct=Math.max(0,Math.min(90,+v('V')||0));break;
    case 'wait':yield* Wt(v('T'));break;
    case 'wait_until':while(!v('C'))yield;break;
    case 'forever':while(true){yield* exec(sub('DO'));yield;}
@@ -899,9 +923,9 @@ function frame(){if(mode!=='build'){for(let k=0;k<sim.speed;k++){
       if(sim.running&&!sim.gen&&!sim.hats.length){sim.running=false;bot.l=bot.r=0;status('Programa terminou.');obrProgramEnded();}
     }catch(e){sim.running=false;bot.l=bot.r=0;status('Erro no programa: '+e.message);}}
     if(mode==='sim'){phys();check();}}
-  poseRobot();$('sn').textContent='Sensores de cor: '+(RB.sens.map((_,i)=>'SC'+(i+1)+'='+S.light(i+1)).join('  ')||'nenhum')+'  |  ultrassônico: '+S.ultra()+' cm  |  vítimas na zona: '+score()+'  |  massa: '+Math.round(RB.m*1000)+' g  |  velocidade: '+Math.round(bot.v*100)+' cm/s'+chkTxt()+varTxt()+obrTxt();}
+  poseRobot();$('sn').textContent='Sensores de cor: '+(RB.sens.map((_,i)=>'SC'+(i+1)+'='+S.light(i+1)).join('  ')||'nenhum')+'  |  ultrassônico: '+(RB.ultra?S.ultra()+' cm':'não montado')+'  |  vítimas na zona: '+score()+'  |  massa: '+Math.round(RB.m*1000)+' g  |  velocidade: '+Math.round(bot.v*100)+' cm/s'+chkTxt()+varTxt()+obrTxt();}
   if(mode==='build')$('sn').textContent=massTxt();hudTick();tutTick();emptyUI();controls.update();renderer.render(scene,camera);requestAnimationFrame(frame);}
-$('run').onclick=()=>{const tops=ws.getTopBlocks(false),s=tops.find(b=>b.type==='start'),hs=tops.filter(b=>b.type==='when_cond');
+$('run').onclick=()=>{if(window.PYM&&PYM()){pyRun();return;}const tops=ws.getTopBlocks(false),s=tops.find(b=>b.type==='start'),hs=tops.filter(b=>b.type==='when_cond');
   if(!s&&!hs.length){status('Adicione o bloco "quando o robô iniciar" (ou um bloco "quando").');return;}
   if(!RB.ok){status('Monte o robô com rodas dos dois lados (aba Montar robô).');return;}
   if(mode!=='sim')setMode('sim');for(const k in VARS)delete VARS[k];TIM0=0;resetBot();sim.gen=s?exec(s.getNextBlock()):null;sim.hats=hs.map(b=>({b,gen:null,prev:false}));sim.running=true;
@@ -1207,6 +1231,56 @@ $('arSave').onclick=saveArena;$('arOpen').onclick=()=>$('arFile').click();
 $('arFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();
   r.onload=()=>{try{loadArenaData(JSON.parse(r.result),f.name);}catch(x){status('Arquivo inválido: escolha um arquivo .arena salvo por este simulador.');}};r.readAsText(f);};
 $('tutFold').onclick=()=>{const t=$('tut'),f=t.classList.toggle('fold');$('tutFold').textContent=f?'▸':'▾';setTimeout(fit,0);};
+/* ---------- Editor de Python (Skulpt) que controla o robô ---------- */
+(function(){
+let on=false,tok=0,calls=0,W=[],done=false,err=null;
+const ed=$('pyed'),out=$('pyout'),NONE=()=>Sk.builtin.none.none$;
+const DIRC={frente:'F',tras:'B',esquerda:'L',direita:'R'},CORS=[['preto','B'],['verde','G'],['azul','A'],['vermelho','R'],['prata','S'],['branco','W']];
+const cor=n=>{for(const[k,c]of CORS)if(S.color(n,c))return k;return 'nenhuma';};
+const waitP=t=>new Promise(res=>W.push({e:sim.time+Math.max(0,+t||0),res}));
+const chk=my=>{if(my!==tok||!sim.running)throw new Sk.builtin.Exception('Programa parado');};
+const py=r=>r===undefined?NONE():Sk.ffi.remapToPy(r);
+const bad=m=>{throw new Sk.builtin.RuntimeError(m);};
+const needC=n=>{const k=+n||1;if(!RB.sens||!RB.sens[k-1])bad('O sensor de cor SC'+k+' não está montado no robô.');};
+const needU=()=>{if(!RB.ultra)bad('O sensor ultrassônico não está montado no robô.');};
+const needG=()=>{if(!RB.gyro)bad('O giroscópio não está montado no robô.');};
+const needK=()=>{if(!RB.claw)bad('O robô não tem garra montada.');};
+function api(){
+ const def=(n,fn)=>{Sk.builtins[n]=new Sk.builtin.func(function(){const a=[...arguments].map(x=>Sk.ffi.remapToJs(x)),my=tok,go=()=>{chk(my);return py(fn(...a));};
+  if(++calls>8)return Sk.misceval.promiseToSuspension(waitP(0).then(go));return go();});};
+ const defW=(n,fn)=>{Sk.builtins[n]=new Sk.builtin.func(function(){const a=[...arguments].map(x=>Sk.ffi.remapToJs(x)),my=tok;chk(my);
+  return Sk.misceval.promiseToSuspension(fn(...a).then(()=>{chk(my);return NONE();}));});};
+ def('mover',(d,v)=>{bot.move(DIRC[d]||'F',cl(+v||0));});
+ defW('mover_por',(d,v,s)=>{bot.move(DIRC[d]||'F',cl(+v||0));return waitP(s).then(()=>{bot.l=bot.r=0;});});
+ def('motores',(l,r)=>{bot.l=cl(+l||0);bot.r=cl(+r||0);});
+ def('parar_motores',()=>{bot.l=bot.r=0;});
+ defW('esperar',s=>waitP(s));
+ def('sensor_cor',n=>{needC(n);return cor(+n||1);});def('luz',n=>{needC(n);return S.light(+n||1);});def('distancia',()=>{needU();return S.ultra();});
+ def('giroscopio',()=>{needG();const d=(bot.a-START.a)*57.2958;return Math.round((((d+180)%360)+360)%360-180);});
+ def('rotacao_motor',m=>Math.round(m==='direito'?bot.rr:bot.rl));def('zerar_rotacao',()=>{bot.rl=bot.rr=0;});
+ def('garra',a=>{needK();bot.ct=a==='abrir'?90:0;});def('servo_garra',g=>{needK();bot.ct=Math.max(0,Math.min(90,+g||0));});
+ def('garra_segurando',()=>{needK();return objs.some(o=>isP(o)&&o.held);});def('objeto_na_garra',()=>{needK();return !!pocketVic();});
+ def('vitimas',()=>score());def('temporizador',()=>Math.round((sim.time-TIM0)*100)/100);def('resetar_temporizador',()=>{TIM0=sim.time;});}
+function* gen(my){while(my===tok){calls=0;const t=sim.time;W=W.filter(w=>{if(t>=w.e){w.res();return false;}return true;});
+ if(done){if(err){const m=String(err);err=null;out.textContent+='\n'+m+'\n';throw new Error(m);}return;}yield;}}
+const rd=x=>{if(Sk.builtinFiles===undefined||Sk.builtinFiles.files[x]===undefined)throw 'Arquivo não encontrado: '+x;return Sk.builtinFiles.files[x];};
+window.PYM=()=>on;
+window.pyRun=function(){
+ if(typeof Sk==='undefined'){status('O Python ainda está carregando… tente de novo em instantes.');return;}
+ if(!RB.ok){status('Monte o robô com rodas dos dois lados (aba Montar robô).');return;}
+ if(mode!=='sim')setMode('sim');for(const k in VARS)delete VARS[k];TIM0=0;resetBot();
+ tok++;const my=tok;W=[];done=false;err=null;calls=0;out.textContent='';Sk.hardInterrupt=false;
+ Sk.configure({output:x=>{out.textContent=(out.textContent+x).slice(-4000);out.scrollTop=out.scrollHeight;},read:rd,__future__:Sk.python3,yieldLimit:300});
+ api();sim.hats=[];sim.gen=gen(my);sim.running=true;status('Executando seu programa em Python…');
+ Sk.misceval.asyncToPromise(()=>Sk.importMainWithBody('<stdin>',false,ed.value,true)).then(()=>{if(my===tok)done=true;},e=>{if(my===tok){err=e;done=true;}});};
+const halt=()=>{tok++;try{Sk.hardInterrupt=true;}catch(e){}};
+$('stop').addEventListener('click',halt);$('reset').addEventListener('click',halt);
+$('pyTog').onclick=()=>{on=!on;$('blocks').style.display=on?'none':'';$('pyw').classList.toggle('on',on);
+ $('pyTog').textContent=on?'🧩 Blocos':'🐍 Python';if(!on)setTimeout(()=>Blockly.svgResize(ws),50);};
+ed.value='# Programa em Python para o robô\nprint("Olá, robô!")\n\nmover("frente", 50)\nesperar(2)\nparar_motores()\n\nprint("Distância:", distancia())\n';
+ed.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();document.execCommand('insertText',false,'    ');}
+ else if(e.key==='Enter'){const v=ed.value,s=ed.selectionStart,ls=v.lastIndexOf('\n',s-1)+1,ln=v.slice(ls,s),ind=ln.match(/^ */)[0]+(/:\s*$/.test(ln)?'    ':'');e.preventDefault();document.execCommand('insertText',false,'\n'+ind);}});
+})();
 $('blkFold').onclick=()=>{const m=document.querySelector('main'),c=m.classList.toggle('cl'),rs=()=>{try{Blockly.svgResize(ws);}catch(e){}fit();};
   $('blkFold').textContent=c?'▶':'◀';$('blkFold').title=c?'Expandir blocos':'Recolher blocos';rs();setTimeout(rs,300);};
 $('rbSave').onclick=saveRobot;$('rbOpen').onclick=()=>$('rbFile').click();
