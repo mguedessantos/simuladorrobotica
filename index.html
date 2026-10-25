@@ -347,6 +347,87 @@ main.cl .ctl{writing-mode:vertical-rl;white-space:nowrap}
 #exw summary{cursor:pointer;padding:3px 0}#exw .gh{font-weight:700;margin:10px 0 2px;color:var(--ink-dark)}#exw .gh:first-child{margin-top:2px}
 #exw .bd{padding:2px 0 8px 26px;line-height:1.55}#exw .pr,#exw .rq{font-size:12px;color:var(--mute);margin-top:3px}#exw .dc{margin-top:4px}#exw .dc summary{font-size:12px}
 #exw details.dn>summary .t{text-decoration:line-through;color:var(--mute)}#exw input[type=checkbox]{margin-right:6px;vertical-align:middle}#exw code{font:12px ui-monospace,Menlo,Consolas,monospace;background:var(--panel);padding:1px 4px;border-radius:4px}
+
+/* ===== LAYOUT: barra superior + ferramentas à esquerda + 3D limpo ===== */
+header{padding:8px 16px;gap:8px}header h1{font-size:18px;margin-right:8px}
+header button,header select{padding:6px 12px}
+main{display:flex;gap:0;padding:0;overflow:hidden;min-width:0;--side:min(470px,42vw);--strip:132px}
+main.nl{--strip:0px}
+#tools{flex:none;width:240px;display:flex;flex-direction:column;min-height:0;background:var(--panel);border-right:1px solid var(--line);z-index:8}
+#toolHd{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;font-weight:700;color:var(--ink-dark);border-bottom:1px solid var(--line)}
+#toolFold{padding:2px 9px;font-size:13px}
+#toolBody{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
+main.tc #tools{width:52px}main.tc #toolBody,main.tc #toolHd span{display:none}main.tc #toolHd{justify-content:center;padding:8px 0}
+#tools .row{flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:6px;padding:10px 12px}
+#tools .row>span:not(.sp){display:flex;flex-direction:column;gap:6px;width:100%}
+#tools .row .sp{display:none}
+#tools .row button,#tools .row select,#tools .row input[type=text],#tools .row label{width:100%;box-sizing:border-box;justify-content:flex-start}
+#tools #rowFiles .grp{flex-direction:column;align-items:stretch}
+#tools .st{font-size:12px;padding:8px 12px}#tools .st:empty{display:none}
+#stage{position:relative;flex:1;min-width:0;min-height:0}
+#view{position:absolute;inset:0;min-height:0}
+#hudL{left:12px;top:12px}#hudR{left:264px;right:auto;top:12px}
+#empty{padding-right:calc(var(--side) + 32px)}
+#side{position:absolute;top:12px;right:12px;bottom:calc(var(--strip) + 12px);width:var(--side);z-index:7;display:flex;flex-direction:column;gap:10px;pointer-events:none;min-height:0}
+#side>*{pointer-events:auto}
+#tut{flex:none;max-height:46%;overflow:auto;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg)}
+#tut .tb{grid-template-columns:1fr!important}
+#blkCard{flex:1;min-height:0;border-radius:16px;box-shadow:var(--shadow-lg)}
+#blkCard .ct{flex-wrap:wrap}
+#blocks{min-height:0!important}#pyw{min-height:0}
+main.cl #blocks,main.cl #pyw.on{display:none!important}
+main.cl #blkCard{flex:none}main.cl .ctl{writing-mode:horizontal-tb}
+#lessons{position:absolute;left:12px;right:12px;bottom:10px;height:104px;z-index:7;display:flex;flex-direction:column;gap:6px}
+main.nl #lessons{display:none}
+#lessons .lt{font-weight:700;font-size:13px;letter-spacing:.18em;color:var(--ink-dark);padding-left:4px}
+#lsRow{display:flex;gap:8px;align-items:stretch;flex:1;min-height:0}
+#lsRow>button{flex:none;width:34px;height:34px;padding:0;border-radius:50%;align-self:center;font-size:20px}
+#lsList{display:flex;gap:10px;overflow-x:auto;flex:1;scrollbar-width:none;scroll-snap-type:x proximity}
+#lsList::-webkit-scrollbar{display:none}
+.lc{flex:none;min-width:210px;max-width:270px;justify-content:flex-start;text-align:left;gap:12px;padding:8px 16px;border-radius:14px;scroll-snap-align:start}
+.lc .ic{font-size:28px}.lc .tx{display:flex;flex-direction:column;font-size:12px;letter-spacing:.04em;text-transform:uppercase;line-height:1.25;white-space:normal}
+.lc .tx i{font-style:normal;color:var(--mute);font-size:11px}
+.lc.cur{border:2px solid var(--acc);background:var(--soft);color:var(--ink-dark)}.lc.lock{opacity:.45;cursor:not-allowed}
+@media (max-width:760px){
+  main{flex-direction:column;overflow:auto}
+  #tools,main.tc #tools{width:auto;flex:none}#toolBody{overflow:visible}main.tc #toolBody{display:block}
+  #stage{flex:none;display:flex;flex-direction:column;gap:12px;padding:12px}
+  #view{position:relative;inset:auto;height:60vh;min-height:320px;flex:none;border-radius:16px}
+  #side,#lessons{position:static;width:auto;flex:none}#side{max-height:none}#tut{max-height:none}
+  #blkCard{flex:none;min-height:480px}#lessons{height:112px}#empty{padding-right:20px}
+}
+
+/* Peças: painel flutuante que substitui a programação ao montar */
+#side>#rowBuild{flex:1 1 auto;min-height:0;overflow-y:auto;align-content:flex-start;gap:8px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:var(--shadow-lg)}
+#side:has(>#rowBuild[style*="flex"]) #blkCard{display:none}
+
+/* ===== painel de peças organizado, objetivo azul no topo ===== */
+#side>#rowBuild{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:16px;padding:14px}
+.bs{display:flex;flex-direction:column;gap:8px}
+.bt{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.bg2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bs .dd{display:block}.bs .ddb,.bs button,.bs select{width:100%;box-sizing:border-box}
+.bs label{width:100%;box-sizing:border-box;justify-content:flex-start}
+#brTools{display:flex;gap:8px}#brTools>*{flex:1;min-width:0}
+#rowRobot{display:none}
+main:has(#rowBuild[style*="flex"]) #rowRobot{display:flex}
+#tools #rowRobot{flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px}
+#tools #rowRobot input,#tools #rowRobot button{width:100%;box-sizing:border-box}
+#tut{position:absolute;top:12px;left:12px;right:calc(var(--side) + 24px);max-width:780px;max-height:42%;z-index:7;overflow:auto;background:var(--acc);border:0;border-radius:16px;box-shadow:var(--shadow-lg)}
+#tut .tt,#tut .mis{color:#fff}
+#tut .tb{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)!important}
+#tutDots i{background:rgba(255,255,255,.45)}#tutDots i.d{background:#fff}
+#tutDots i.c{background:#fff;box-shadow:0 0 0 2px var(--acc),0 0 0 3px #fff}
+#tut button.pri{background:#fff;color:var(--acc-hover);border-color:#fff}
+#tut .hint,#tut .more,#tutL{color:var(--ink)}
+#hudL,#hudR{top:auto;bottom:calc(var(--strip) + 12px)}
+@media (max-width:1150px){#tut .tb{grid-template-columns:1fr!important}}
+@media (max-width:760px){#tut{position:static;max-width:none;max-height:none}#hudL,#hudR{bottom:12px}}
+
+/* blocos recolhidos: painel compacto e 3D centralizado */
+main.cl:not(:has(#rowBuild[style*="flex"])){--side:320px}
+main.cl:not(:has(#rowBuild[style*="flex"])) #empty{padding-right:20px}
+main.cl:not(:has(#rowBuild[style*="flex"])) #tut{right:calc(var(--side) + 24px)}
 </style>
 </head>
 <body>
@@ -373,62 +454,25 @@ main.cl .ctl{writing-mode:vertical-rl;white-space:nowrap}
   <button id="reset">🔄 Reiniciar</button>
 </header>
 <main>
-  <section class="card">
-    <div class="ct"><button id="blkFold" title="Recolher blocos">◀</button><span class="ctl">🧩 Programação em blocos</span><span class="sp"></span><button id="pyTog" title="Escrever código em Python">🐍 Python</button><button id="exTog" title="Lista de exercícios de Python">📝 Exercícios</button><button id="tutClr" title="Apagar todos os blocos">🧹 Limpar blocos</button></div>
-    <div id="blocks"></div>
-    <div id="pyw"><div id="exw"></div><div id="pyb"><input type="text" id="pyNm" value="meu_programa" title="Nome do arquivo (sem .py)" maxlength="40"><button id="pySave" title="Baixar o código como arquivo .py (Ctrl+S)">💾 Salvar .py</button><button id="pyOpen" title="Abrir um arquivo .py no editor">📂 Abrir .py</button><input type="file" id="pyFile" accept=".py,text/x-python,text/plain" style="display:none"></div><div id="pyc"><pre id="pyn" aria-hidden="true"></pre><div id="pyx"><pre id="pyh" aria-hidden="true"></pre><textarea id="pyed" spellcheck="false" wrap="off"></textarea></div></div><pre id="pyout"></pre><details id="pyref"><summary>📖 Comandos do robô</summary><pre>mover("frente", 50)        # frente, tras, esquerda, direita (-100 a 100)
-mover_por("frente", 50, 2) # move por 2 s e para
-motores(esq, dir)          # velocidade de cada motor
-parar_motores()
-esperar(1.5)               # segundos
-sensor_cor(1)              # "preto" "verde" "azul" "vermelho" "prata" "branco"
-luz(1)                     # 0 a 100
-distancia()                # ultrassônico, em cm
-giroscopio()               # -180 a 180
-rotacao_motor("esquerdo")  # ou "direito";  zerar_rotacao()
-garra("abrir")             # ou "fechar";  servo_garra(0 a 90)
-garra_segurando()          # True/False;  objeto_na_garra()
-vitimas()                  # vítimas na zona de resgate
-temporizador()             # resetar_temporizador()
-print("texto", valor)      # aparece na caixa abaixo do editor</pre></details></div>
-  </section>
-  <section class="card">
-    <div id="tut">
-      <div class="tt">
-        <button id="tutFold" title="Recolher/expandir instruções">▾</button>
-        <span id="tutT"></span><span id="tutDots"></span>
-        <select id="tutSel"></select>
-        <span class="sp"></span>
-        <button id="tutHint">💡 Dica</button>
-        <button id="tutMore">📖 Detalhes</button>
-        <button id="tutChk" class="pri">✅ Verificar robô</button>
-        <button id="tutRst">🔁 Recomeçar fase</button>
-      </div>
-      <div class="tb"><div id="tutD"></div><div id="tutL"></div></div>
+  <aside id="tools"><div id="toolHd"><span>🧰 Ferramentas</span><button id="toolFold" title="Recolher ferramentas">◀</button></div><div id="toolBody"><div class="row" id="rowFiles">
+      <span class="grp" id="grpArena">
+        <b>🗺️ Arena:</b>
+        <input type="text" id="anm" placeholder="Nome da arena" size="14">
+        <button id="arSave" class="pri">💾 Salvar arena</button>
+        <button id="arOpen">📂 Abrir arena</button>
+        <input type="file" id="arFile" accept=".arena,.json,application/json" style="display:none">
+      </span>
+      <span class="grp" id="grpProj" style="display:none">
+        <b>🗂️ Projetos no navegador (robô + arena):</b>
+        <input type="text" id="nm" placeholder="Nome do projeto" size="14">
+        <button id="save">💾 Salvar</button>
+        <select id="lst"></select>
+        <button id="load">📂 Abrir</button>
+        <button id="rm">🗑️ Apagar</button>
+      </span>
     </div>
-    <div class="row" id="rowBuild" style="display:none">
-      <b>🧱 Peças:</b>
-      <span class="dd"><button class="ddb">🧱 Blocos ▾</button><div class="ddm"><button data-part="block">Bloco</button><button data-part="caster">Rodízio (esfera)</button><button data-part="brickI">Viga I (1×3)</button><button data-part="brickL">Peça L (3 células)</button><button data-part="pin">Conector (pino)</button><button data-part="brickI5">Viga longa I (1×5)</button><button data-part="brickQ">Bloco 2×2 (4 células)</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span>
-      <span id="brTools" style="display:none"><button id="brRot" title="Girar a peça (tecla R)">↻ Girar</button><select id="brCol" title="Cor da peça"></select></span>
-      <span class="dd"><button class="ddb">⚙️ Atuadores ▾</button><div class="ddm"><button data-part="wheel">Motor TT + roda</button><button data-part="servo">Motor servo</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span>
-      <span class="dd"><button class="ddb">👁️ Sensores ▾</button><div class="ddm"><button data-part="ultra">Ultrassônico</button><button data-part="color">Sensor de cor</button><button data-part="gyro">Giroscópio</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span>
-      <span class="dd"><button class="ddb">🔋 Alimentação ▾</button><div class="ddm"><button data-part="battery">Bateria</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span>
-      <span class="sp"></span>
-      <button data-part="move">🖐️ Mover</button>
-      <button data-part="paint">🎨 Pintar</button><button data-part="erase">🗑️ Apagar</button>
-      <button id="defbot">🤖 Padrão</button>
-      <button id="clrbot">✨ Limpar</button>
-      <button id="undo">↩️ Desfazer</button>
-      <label>🧭 Frente <select id="frontSel"><option value="0">↑ topo da tela</option><option value="1">→ direita</option><option value="2">↓ baixo</option><option value="3">← esquerda</option></select></label>
-      <label><input type="checkbox" id="lbl" checked> Rótulos</label>
-      <span class="sp"></span>
-      <input type="text" id="rnm" placeholder="Nome do robô" size="14">
-      <button id="rbSave" class="pri">💾 Salvar robô</button>
-      <button id="rbOpen">📂 Abrir robô</button>
-      <input type="file" id="rbFile" accept=".robosim,.json,application/json" style="display:none">
-    </div>
-    
-    <div class="row" id="rowArena" style="display:none">
+  <div class="row" id="rowRobot"><b>🤖 Meu robô</b><input type="text" id="rnm" placeholder="Nome do robô" size="14"><button id="rbSave" class="pri">💾 Salvar robô</button><button id="rbOpen">📂 Abrir robô</button><input type="file" id="rbFile" accept=".robosim,.json,application/json" style="display:none"></div>
+<div class="row" id="rowArena" style="display:none">
       <span id="tilePal"></span>
       <button style="display:none" data-tool="select" class="on">🖱️ Selecionar</button>
       <button style="display:none" data-tool="line">📏 Reta</button>
@@ -457,29 +501,53 @@ print("texto", valor)      # aparece na caixa abaixo do editor</pre></details></
       <button id="obrS2" class="pri">Sala 3</button>
     </div>
 
-    <div id="view"><div id="hudL" class="hud"></div><div id="hudR" class="hud"></div><div id="empty"><div class="eb"><b>🔧 Monte seu robô!</b><span>Clique em “Montar robô”.</span></div></div></div>
-    
     <div class="st" id="st">Pronto.</div>
     <div class="st" id="sn"></div>
     
-    <div class="row" id="rowFiles">
-      <span class="grp" id="grpArena">
-        <b>🗺️ Arena:</b>
-        <input type="text" id="anm" placeholder="Nome da arena" size="14">
-        <button id="arSave" class="pri">💾 Salvar arena</button>
-        <button id="arOpen">📂 Abrir arena</button>
-        <input type="file" id="arFile" accept=".arena,.json,application/json" style="display:none">
-      </span>
-      <span class="grp" id="grpProj" style="display:none">
-        <b>🗂️ Projetos no navegador (robô + arena):</b>
-        <input type="text" id="nm" placeholder="Nome do projeto" size="14">
-        <button id="save">💾 Salvar</button>
-        <select id="lst"></select>
-        <button id="load">📂 Abrir</button>
-        <button id="rm">🗑️ Apagar</button>
-      </span>
+    </div></aside>
+  <div id="stage">
+  <div id="view"><div id="hudL" class="hud"></div><div id="hudR" class="hud"></div><div id="empty"><div class="eb"><b>🔧 Monte seu robô!</b><span>Clique em “Montar robô”.</span></div></div></div>
+    
+    
+  <div id="tut">
+      <div class="tt">
+        <button id="tutFold" title="Recolher/expandir instruções">▾</button>
+        <span id="tutT"></span><span id="tutDots"></span>
+        <select id="tutSel"></select>
+        <span class="sp"></span>
+        <button id="tutHint">💡 Dica</button>
+        <button id="tutMore">📖 Detalhes</button>
+        <button id="tutChk" class="pri">✅ Verificar robô</button>
+        <button id="tutRst">🔁 Recomeçar fase</button>
+      </div>
+      <div class="tb"><div id="tutD"></div><div id="tutL"></div></div>
     </div>
-  </section>
+    <aside id="side"><div class="row" id="rowBuild" style="display:none">
+  <div class="bs"><div class="bt">🧱 Adicionar peças</div><div class="bg2"><span class="dd"><button class="ddb">🧱 Blocos ▾</button><div class="ddm"><button data-part="block">Bloco</button><button data-part="caster">Rodízio (esfera)</button><button data-part="brickI">Viga I (1×3)</button><button data-part="brickL">Peça L (3 células)</button><button data-part="pin">Conector (pino)</button><button data-part="brickI5">Viga longa I (1×5)</button><button data-part="brickQ">Bloco 2×2 (4 células)</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span><span class="dd"><button class="ddb">⚙️ Atuadores ▾</button><div class="ddm"><button data-part="wheel">Motor TT + roda</button><button data-part="servo">Motor servo</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span><span class="dd"><button class="ddb">👁️ Sensores ▾</button><div class="ddm"><button data-part="ultra">Ultrassônico</button><button data-part="color">Sensor de cor</button><button data-part="gyro">Giroscópio</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span><span class="dd"><button class="ddb">🔋 Alimentação ▾</button><div class="ddm"><button data-part="battery">Bateria</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span></div><span id="brTools" style="display:none"><button id="brRot" title="Girar a peça (tecla R; Shift+R gira ao contrário)">↻ Girar (R)</button><select id="brCol" title="Cor da peça"></select></span></div>
+  <div class="bs"><div class="bt">🛠️ Ferramentas</div><div class="bg2"><button data-part="move">🖐️ Mover</button><button data-part="paint">🎨 Pintar</button><button data-part="erase">🗑️ Apagar</button><button id="undo">↩️ Desfazer</button></div></div>
+  <div class="bs"><div class="bt">🤖 Robô</div><div class="bg2"><button id="defbot">🤖 Padrão</button><button id="clrbot">✨ Limpar</button></div><label>🧭 Frente <select id="frontSel"><option value="0">↑ topo da tela</option><option value="1">→ direita</option><option value="2">↓ baixo</option><option value="3">← esquerda</option></select></label><label><input type="checkbox" id="lbl" checked> Rótulos</label></div>
+</div>
+<section class="card" id="blkCard">
+    <div class="ct"><button id="blkFold" title="Recolher blocos">◀</button><span class="ctl">🧩 Programação em blocos</span><span class="sp"></span><button id="pyTog" title="Escrever código em Python">🐍 Python</button><button id="exTog" title="Lista de exercícios de Python">📝 Exercícios</button><button id="tutClr" title="Apagar todos os blocos">🧹 Limpar blocos</button></div>
+    <div id="blocks"></div>
+    <div id="pyw"><div id="exw"></div><div id="pyb"><input type="text" id="pyNm" value="meu_programa" title="Nome do arquivo (sem .py)" maxlength="40"><button id="pySave" title="Baixar o código como arquivo .py (Ctrl+S)">💾 Salvar .py</button><button id="pyOpen" title="Abrir um arquivo .py no editor">📂 Abrir .py</button><input type="file" id="pyFile" accept=".py,text/x-python,text/plain" style="display:none"></div><div id="pyc"><pre id="pyn" aria-hidden="true"></pre><div id="pyx"><pre id="pyh" aria-hidden="true"></pre><textarea id="pyed" spellcheck="false" wrap="off"></textarea></div></div><pre id="pyout"></pre><details id="pyref"><summary>📖 Comandos do robô</summary><pre>mover("frente", 50)        # frente, tras, esquerda, direita (-100 a 100)
+mover_por("frente", 50, 2) # move por 2 s e para
+motores(esq, dir)          # velocidade de cada motor
+parar_motores()
+esperar(1.5)               # segundos
+sensor_cor(1)              # "preto" "verde" "azul" "vermelho" "prata" "branco"
+luz(1)                     # 0 a 100
+distancia()                # ultrassônico, em cm
+giroscopio()               # -180 a 180
+rotacao_motor("esquerdo")  # ou "direito";  zerar_rotacao()
+garra("abrir")             # ou "fechar";  servo_garra(0 a 90)
+garra_segurando()          # True/False;  objeto_na_garra()
+vitimas()                  # vítimas na zona de resgate
+temporizador()             # resetar_temporizador()
+print("texto", valor)      # aparece na caixa abaixo do editor</pre></details></div>
+  </section></aside>
+  <div id="lessons"><div class="lt">FASES</div><div id="lsRow"><button id="lsPrev" title="Anterior">‹</button><div id="lsList"></div><button id="lsNext" title="Próxima">›</button></div></div>
+  </div>
 </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
@@ -587,7 +655,7 @@ function calc(){const w=parts.filter(p=>p.t==='wheel'),n=w.length||1;
   let M=0,I=0,sf=0,slat=0,shh=0;for(const p of parts){const l=lc(p),q=(MS[p.t]||5)/1000,hh=(p.t==='wheel'||p.t==='caster')?3:3+2*(p.k||0);M+=q;sf+=q*l.f;slat+=q*l.lat;shh+=q*hh;I+=q*((l.f/100)**2+(l.lat/100)**2);}
   const hl=hull(parts.filter(p=>p.t==='wheel'||p.t==='caster').map(lc));
   const rc=parts.reduce((r,p)=>{const l=lc(p),e=p.t==='wheel'?3:1;return{f0:Math.min(r.f0,l.f-e),f1:Math.max(r.f1,l.f+e),l0:Math.min(r.l0,l.lat-1),l1:Math.max(r.l1,l.lat+1)};},{f0:1e9,f1:-1e9,l0:1e9,l1:-1e9});
-  RB={ok:!!(Lw.length&&Rw.length),ai,aj,nL:Lw.length,nR:Rw.length,m:Math.max(M,.15),I:Math.max(I,.0015),cf:M?sf/M:0,cl:M?slat/M:0,hc:M?shh/M:3,hull:hl,gyro:parts.some(p=>p.t==='gyro'),rect:parts.length?rc:{f0:-3,f1:3,l0:-3,l1:3},cells:parts.filter(p=>(p.k||0)===0).map(p=>{const l=lc(p),e=p.t==='wheel'?3:1;return{f0:l.f-e,f1:l.f+e,l0:l.lat-1,l1:l.lat+1};}),wb:Lw.length&&Rw.length?(m(Rw)-m(Lw))*2:10,
+  const flo=orphanList();RB={ok:!!(Lw.length&&Rw.length)&&!flo.length,fl:flo,ai,aj,nL:Lw.length,nR:Rw.length,m:Math.max(M,.15),I:Math.max(I,.0015),cf:M?sf/M:0,cl:M?slat/M:0,hc:M?shh/M:3,hull:hl,gyro:parts.some(p=>p.t==='gyro'),rect:parts.length?rc:{f0:-3,f1:3,l0:-3,l1:3},cells:parts.filter(p=>(p.k||0)===0).map(p=>{const l=lc(p),e=p.t==='wheel'?3:1;return{f0:l.f-e,f1:l.f+e,l0:l.lat-1,l1:l.lat+1};}),wb:Lw.length&&Rw.length?(m(Rw)-m(Lw))*2:10,
     sens:parts.filter(p=>p.t==='color').map(p=>Object.assign({p},lc(p))).sort((a,b)=>a.lat-b.lat||b.f-a.f),ultra:u?lc(u):null,claw:(cw=>cw?lc(cw):null)(parts.find(p=>p.t==='claw')),
     R:Math.max(6,...parts.map(p=>{const l=lc(p);return Math.hypot(l.lat,l.f)+1;}))};
   const lb=new Map(),nm=(a,pr)=>a.forEach((p,i)=>lb.set(p,pr+(a.length>1?i+1:'')));
@@ -624,6 +692,10 @@ function dropOrphans(){const left=new Set(parts),comps=[];
     while(st.length){const a=st.pop();for(const b of[...left])if(linked(a,b)){left.delete(b);comp.push(b);st.push(b);}}comps.push(comp);}
   if(comps.length<2)return 0;const wc=c=>c.filter(p=>p.t==='wheel').length;comps.sort((a,b)=>b.length-a.length||wc(b)-wc(a));
   const n=parts.length-comps[0].length;parts=comps[0];return n;}
+function orphanList(){const left=new Set(parts),comps=[];
+  while(left.size){const s0=left.values().next().value,comp=[s0],st=[s0];left.delete(s0);
+    while(st.length){const a=st.pop();for(const b of[...left])if(linked(a,b)){left.delete(b);comp.push(b);st.push(b);}}comps.push(comp);}
+  if(comps.length<2)return[];const wc=c=>c.filter(p=>p.t==='wheel').length;comps.sort((a,b)=>b.length-a.length||wc(b)-wc(a));return comps.slice(1).flat();}
 function placeMsg(t,c){const at=(i,j,k)=>parts.some(q=>q.i===i&&q.j===j&&(q.k||0)===k);
   if(t==='erase')return at(c.i,c.j,c.k)?'':'Nada para apagar aqui.';
   const low=t==='wheel'||t==='color'||t==='caster'||t==='claw';
@@ -637,12 +709,12 @@ function placeMsg(t,c){const at=(i,j,k)=>parts.some(q=>q.i===i&&q.j===j&&(q.k||0
   if(low&&at(c.i,c.j,1))return 'Já existe uma peça em cima dessa posição.';
   if(c.k>0&&parts.some(q=>(q.t==='wheel'||q.t==='color')&&q.i===c.i&&q.j===c.j&&(q.k||0)===c.k-1))return 'Rodas e sensores não suportam peças em cima.';
   const np={t,i:c.i,j:c.j,k:c.k};
-  return !parts.length||parts.some(q=>linked(np,q))?'':'A peça precisa encaixar em outra: clique numa face de uma peça já montada.';}
+  return '';}
 const selP=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2.5,2.5,2.5)),new THREE.LineBasicMaterial({color:0xf59e0b}));selP.visible=false;scene.add(selP);
 let msel=null;
 function showSel(){selP.visible=!!msel&&mode==='build';if(msel)selP.position.set((msel.i-CX)*2,3+2*(msel.k||0)+body.position.y,(msel.j-CY)*2);}
 function moveMsg(from,c){if(from.g)return 'Vigas e peças L não podem ser movidas: apague e coloque de novo.';const save=parts;parts=save.filter(q=>q!==from);let m=placeMsg(from.t,c);
-  if(!m){parts=parts.concat([Object.assign({},from,{i:c.i,j:c.j,k:c.k})]);if(dropOrphans())m='Mover assim soltaria outras peças. Tente outro lugar.';}
+  if(!m){parts=parts.concat([Object.assign({},from,{i:c.i,j:c.j,k:c.k})]);}
   parts=save;return m;}
 function doMove(c){
   if(!msel){const q=parts.find(p=>p.i===c.i&&p.j===c.j&&(p.k||0)===c.k);if(q){msel=q;showSel();status('Peça selecionada. Clique onde ela deve ficar (cubo azul = encaixa). Clique nela de novo para cancelar.');}else status('Clique numa peça para selecioná-la.');return;}
@@ -650,7 +722,7 @@ function doMove(c){
   const m=moveMsg(msel,c);if(m){status(m);return;}
   snap();msel.i=c.i;msel.j=c.j;msel.k=c.k;msel=null;buildRobot();status('Peça movida.');}
 const hist=[];function snap(){hist.push(JSON.stringify(parts));if(hist.length>50)hist.shift();}
-$('frontSel').onchange=e=>{const n=+e.target.value,old=FR;FR=n;const sv=parts;parts=sv.slice();const lost=dropOrphans();parts=sv;
+$('frontSel').onchange=e=>{const n=+e.target.value,old=FR,b0=orphanList().length;FR=n;const lost=Math.max(0,orphanList().length-b0);
   if(lost){FR=old;e.target.value=old;buildRobot();status('Não dá para virar a frente para esse lado: '+lost+' peça(s) ficariam soltas (rodas, garra e ultrassônico têm um lado certo). Escolha outra frente ou monte as peças de novo.');return;}
   hist.length=0;msel=null;buildRobot();status('Frente do robô: '+e.target.options[e.target.selectedIndex].text+'. A seta laranja mostra para onde ele anda; as rodas ficam nas laterais.');};
 $('undo').onclick=()=>{if(hist.length){parts=JSON.parse(hist.pop());msel=null;buildRobot();status('Desfeito.');}};
@@ -670,7 +742,10 @@ function tipMsg(T){const d={F:'para frente',B:'para trás',L:'para a esquerda',R
 const comM=new THREE.Mesh(new THREE.SphereGeometry(.55,12,10),new THREE.MeshBasicMaterial({color:0xef4444})),comL=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xef4444}));
 let supM=null;scene.add(comM,comL);
 const frontA=new THREE.ArrowHelper(new THREE.Vector3(0,0,-1),new THREE.Vector3(),6,0xf59e0b,2.4,1.8);frontA.visible=false;scene.add(frontA);
-function vizBuild(){const on=mode==='build';comM.visible=comL.visible=on;frontA.visible=on&&parts.length>0;if(supM){scene.remove(supM);supM.geometry.dispose();supM=null;}if(!on)return;
+let flMk=[];function floatMk(){flMk.forEach(m=>{scene.remove(m);m.geometry.dispose();m.material.dispose();});flMk=[];if(mode!=='build'||!RB.fl||!RB.fl.length)return;
+  for(const p of RB.fl){const m=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2.6,2.6,2.6)),new THREE.LineBasicMaterial({color:0xef4444,depthTest:false}));m.renderOrder=15;m.raycast=()=>{};m.position.set((p.i-CX)*2,3+2*(p.k||0)+body.position.y,(p.j-CY)*2);scene.add(m);flMk.push(m);}
+  status('⚠️ '+RB.fl.length+' peça(s) solta(s) (contorno vermelho): o robô só funciona quando todas as peças estão ligadas umas às outras.');}
+function vizBuild(){const on=mode==='build';floatMk();comM.visible=comL.visible=on;frontA.visible=on&&parts.length>0;if(supM){scene.remove(supM);supM.geometry.dispose();supM=null;}if(!on)return;
   const V=fvec(),W=(lat,f)=>[(RB.ai-CX)*2+f*V.Fx+lat*V.Lx,(RB.aj-CY)*2+f*V.Fy+lat*V.Ly],y=body.position.y,w0=W(RB.cl,RB.cf);
   {const a=W(0,RB.R+1.5);frontA.position.set(a[0],.8,a[1]);frontA.setDirection(new THREE.Vector3(V.Fx,0,V.Fy));}
   comM.position.set(w0[0],RB.hc+y,w0[1]);comL.geometry.setFromPoints([new THREE.Vector3(w0[0],RB.hc+y,w0[1]),new THREE.Vector3(w0[0],.08,w0[1])]);
@@ -961,7 +1036,7 @@ function frame(){if(mode!=='build'){for(let k=0;k<sim.speed;k++){
   if(mode==='build')$('sn').textContent=massTxt();hudTick();tutTick();emptyUI();controls.update();renderer.render(scene,camera);requestAnimationFrame(frame);}
 $('run').onclick=()=>{if(window.PYM&&PYM()){pyRun();return;}const tops=ws.getTopBlocks(false),s=tops.find(b=>b.type==='start'),hs=tops.filter(b=>b.type==='when_cond');
   if(!s&&!hs.length){status('Adicione o bloco "quando o robô iniciar" (ou um bloco "quando").');return;}
-  if(!RB.ok){status('Monte o robô com rodas dos dois lados (aba Montar robô).');return;}
+  if(!RB.ok){status(RB.fl&&RB.fl.length?'O robô tem '+RB.fl.length+' peça(s) solta(s), sem ligação com o resto. Encaixe todas as peças umas nas outras na aba Montar robô.':'Monte o robô com rodas dos dois lados (aba Montar robô).');return;}
   if(mode!=='sim')setMode('sim');for(const k in VARS)delete VARS[k];TIM0=0;resetBot();sim.gen=s?exec(s.getNextBlock()):null;sim.hats=hs.map(b=>({b,gen:null,prev:false}));sim.running=true;
   if(TILES.length&&!OBR.on)pop('Sem a peça “Início”: esta rodada não vale pontos','');else if(OBR.on&&ARENA_KEY===''&&!OBR.fin)pop('Sem a peça “Chegada”: não dá os +60 da chegada','');
   const noUs=hs.some(b=>b.getDescendants(false).some(x=>x.type==='ultra'))&&!RB.ultra;
@@ -976,7 +1051,7 @@ function setMode(m){mode=m;if(gridL)gridL.visible=m==='arena'&&!OBR.on;if(typeof
   if(m==='build'){sim.running=false;camera.position.set(0,40,28);}else{camera.position.set(0,AZ*2.1,AZ*1.5);if(!sim.running)resetBot();}
   bplane.visible=m==='build';floor.visible=m!=='build';objG.visible=m!=='build';hov.visible=false;
   controls.target.set(0,0,0);buildRobot();rebuild();
-  status(m==='build'?'Cada peça precisa encaixar em outra, como no LEGO. O cubo azul mostra onde ela entra (vermelho = não encaixa). Clique no topo de uma peça para empilhar ou na lateral para encaixar ao lado. Arraste para girar a câmera. Use Mover peça para mudar uma peça de lugar.':m==='arena'?'Escolha uma ferramenta e clique ou arraste no piso. Arraste fora das formas para girar a câmera.':'Clique em Executar. Arraste para girar a câmera.');}
+  status(m==='build'?'Monte como no LEGO: o cubo azul mostra onde a peça entra (vermelho = não pode, laranja = ficará solta). Você pode deixar peças soltas, mas o robô só funciona com todas ligadas. Pressione R para girar vigas e peças L. Arraste para girar a câmera.':m==='arena'?'Escolha uma ferramenta e clique ou arraste no piso. Arraste fora das formas para girar a câmera.':'Clique em Executar. Arraste para girar a câmera.');}
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 const tog=(sel_,k,fn)=>document.querySelectorAll(sel_).forEach(b=>b.onclick=()=>{fn(b.dataset[k]);document.querySelectorAll(sel_).forEach(x=>x.classList.toggle('on',x===b));});
 tog('[data-part]','part',v=>{partTool=v;msel=null;showSel();});tog('[data-tool]','tool',v=>aTool=v);
@@ -1011,7 +1086,7 @@ view.addEventListener('pointermove',e=>{if(!drag)return;const p=floorPt(e);if(!p
   if(drag==='draw'){if(sel.t==='line'){sel.x2=p.x;sel.z2=p.z;}else sel.r=Math.hypot(p.x-sel.x,p.z-sel.z);}
   else{shift(sel,p.x-gx,p.z-gz);gx=p.x;gz=p.z;}touch();},true);
 addEventListener('pointerup',e=>{if(drag)controls.enabled=true;drag=null;
-  if(mode==='build'&&down&&e.target===renderer.domElement&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<5){const c=cellAt(e);if(c&&partTool==='move')doMove(c);else if(c&&window.brickClick&&brickClick(c)){}else if(c){const msg=placeMsg(partTool,c);if(msg)status(msg);else{snap();parts=parts.filter(q=>!(q.i===c.i&&q.j===c.j&&(q.k||0)===c.k));if(partTool!=='erase')parts.push({t:partTool,i:c.i,j:c.j,k:c.k});const d=dropOrphans();buildRobot();if(d)status(d+' peça(s) solta(s) foram removidas. Use Desfazer para voltar.');}}const p=null;
+  if(mode==='build'&&down&&e.target===renderer.domElement&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<5){const c=cellAt(e);if(c&&partTool==='move')doMove(c);else if(c&&window.brickClick&&brickClick(c)){}else if(c){const msg=placeMsg(partTool,c);if(msg)status(msg);else{snap();parts=parts.filter(q=>!(q.i===c.i&&q.j===c.j&&(q.k||0)===c.k));if(partTool!=='erase')parts.push({t:partTool,i:c.i,j:c.j,k:c.k});buildRobot();}}const p=null;
     if(p){const i=Math.round(p.x/2+CX),j=Math.round(p.z/2+CY);
       if(i>=0&&i<NI&&j>=0&&j<NJ){parts=parts.filter(q=>!(q.i===i&&q.j===j));if(partTool!=='erase')parts.push({t:partTool,i,j});buildRobot();}}}
   down=null;});
@@ -1094,7 +1169,7 @@ function restoreTiles(pc){TILES=[];OB=[];if(!pc||!Array.isArray(pc.tiles)||!['6x
   TILES=TILES.filter(inGrid);OB=(Array.isArray(pc.ob)?pc.ob:[]).filter(q=>q&&TD[q.type]&&TD[q.type].O&&Number.isFinite(q.x)&&Number.isFinite(q.z)&&Number.isFinite(q.r));
   const sz=$('tSize');if(sz)sz.value=GW+'x'+GH;ensureArena();regen();return true;}
 const pack=()=>JSON.stringify({parts,fr:FR,objs,start:START,arena:[AX,AZ],pecas:pecasPack()},(k,v)=>k==='_m'?undefined:v);
-function unpack(o){OBR.on=false;setArena(...(o.arena||[120,80]));FR=((o.fr|0)%4+4)%4;parts=o.parts||[];dropOrphans();objs=o.objs||[];Object.assign(START,o.start||{});restoreTiles(o.pecas);sel=null;sim.running=false;paintFloor();buildRobot();resetBot();}
+function unpack(o){OBR.on=false;setArena(...(o.arena||[120,80]));FR=((o.fr|0)%4+4)%4;parts=o.parts||[];objs=o.objs||[];Object.assign(START,o.start||{});restoreTiles(o.pecas);sel=null;sim.running=false;paintFloor();buildRobot();resetBot();}
 const getT=()=>{try{return JSON.parse(localStorage.getItem('proj3')||'{}');}catch(e){return{};}};
 function refresh(){const l=$('lst');l.replaceChildren(new Option('Projetos salvos…',''));Object.keys(getT()).forEach(n=>l.add(new Option(n,n)));}
 $('save').onclick=()=>{const n=$('nm').value.trim()||'Meu projeto',t=getT();t[n]=JSON.parse(pack());
@@ -1133,9 +1208,9 @@ const Lg=(x1,z1,x2,z2)=>({t:'line',x1,z1,x2,z2}),Poly=p=>p.slice(1).map((q,i)=>L
 const IT=(t,d,neg)=>({t,d:!!d,neg:neg?1:0});
 const LV=[
  {n:'Crie seu robô',lm:'build',manual:1,objs:()=>[],
-  txt:'Monte seu robô do zero na aba <b>Montar robô</b>. Cada peça precisa encaixar em outra, como no LEGO. Você precisa de chassi (blocos), uma roda de cada lado e uma bateria. Escolha o lado da <b>frente</b> em 🧭 Frente (a seta laranja mostra para onde ele vai andar). Quando terminar, clique em <b>✅ Verificar robô</b> para saber se ele é viável e seguir para a próxima fase.',
+  txt:'Monte seu robô do zero na aba <b>Montar robô</b>. Cada peça precisa encaixar em outra, como no LEGO. Você precisa de um chassi (qualquer conjunto de blocos, vigas ou peças L ligados formando o corpo, até um anel de peças L), uma roda de cada lado e uma bateria. Escolha o lado da <b>frente</b> em 🧭 Frente (a seta laranja mostra para onde ele vai andar). Quando terminar, clique em <b>✅ Verificar robô</b> para saber se ele é viável e seguir para a próxima fase.',
   hint:'Clique no chão azul para colocar a primeira peça. Coloque cada roda na lateral de um bloco. O ponto vermelho é o centro de massa: ele deve ficar dentro da área verde (apoio), senão o robô tomba.',
-  items:()=>[IT('Pelo menos 1 bloco de chassi',has('block')),IT('Uma roda de cada lado',RB.ok),IT('Uma bateria',has('battery'))]},
+  items:()=>[IT('Chassi: peças ligadas formando o corpo',parts.some(p=>p.t==='block'||p.t==='brick'||p.t==='pin')),IT('Uma roda de cada lado',RB.nL&&RB.nR),IT('Todas as peças ligadas',!(RB.fl&&RB.fl.length)),IT('Uma bateria',has('battery'))]},
  {n:'Faça o robô andar',objs:()=>[],
   txt:'Na programação, comece com <b>quando o robô iniciar</b> e use os blocos de <b>Movimento</b> para fazer o robô <b>andar para frente</b>. O objetivo é cumprido quando ele passar da metade da mesa ou encostar na parede do outro lado. Depois clique em ▶ Executar.',
   hint:'Use "mover para frente com velocidade 50%" (ou "por 3 segundos"). Se o robô não sair do lugar, confira se ele tem uma roda de cada lado e clique em 🔄 Reiniciar para tentar de novo.',
@@ -1246,7 +1321,7 @@ function saveRobot(){const name=$('rnm').value.trim()||'Meu robô',fn=slug(name)
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download=fn;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),4000);status('Robô, blocos, código Python e progresso salvos no arquivo "'+fn+'" (pasta Downloads). Use 📂 Abrir robô para continuar depois.');}
 function loadRobotData(o,fn){if(!o||o.app!=='RoboSim3D'||!Array.isArray(o.pecas))throw new Error('formato');
-  sim.running=false;FR=((o.frente|0)%4+4)%4;parts=o.pecas.filter(p=>p&&MS[p.t]!==undefined).map(p=>{const q={t:p.t,i:p.i|0,j:p.j|0,k:p.k|0};if(p.g)q.g=p.g|0;if(p.sh)q.sh=String(p.sh).slice(0,3);if(p.c>=0)q.c=p.c|0;return q;});dropOrphans();hist.length=0;msel=null;
+  sim.running=false;FR=((o.frente|0)%4+4)%4;parts=o.pecas.filter(p=>p&&MS[p.t]!==undefined).map(p=>{const q={t:p.t,i:p.i|0,j:p.j|0,k:p.k|0};if(p.g)q.g=p.g|0;if(p.sh)q.sh=String(p.sh).slice(0,3);if(p.c>=0)q.c=p.c|0;return q;});hist.length=0;msel=null;
   for(const k in VARS)delete VARS[k];ws.clear();if(o.blocos)Blockly.serialization.workspaces.load(o.blocos,ws);
   if(typeof o.python==='string'&&$('pyed')){$('pyed').value=o.python;$('pyed').dispatchEvent(new Event('input'));}if(o.exercicios&&typeof o.exercicios==='object'&&window.exSet)exSet(o.exercicios);
   $('rnm').value=o.nome||'';TUT.max=Math.max(TUT.max,o.faseMaxima|0,o.fase|0);
@@ -1345,7 +1420,7 @@ const rd=x=>{if(Sk.builtinFiles===undefined||Sk.builtinFiles.files[x]===undefine
 window.PYM=()=>on;
 window.pyRun=function(){
  if(typeof Sk==='undefined'){status('O Python ainda está carregando… tente de novo em instantes.');return;}
- if(!RB.ok){status('Monte o robô com rodas dos dois lados (aba Montar robô).');return;}
+ if(!RB.ok){status(RB.fl&&RB.fl.length?'O robô tem '+RB.fl.length+' peça(s) solta(s), sem ligação com o resto. Encaixe todas as peças umas nas outras na aba Montar robô.':'Monte o robô com rodas dos dois lados (aba Montar robô).');return;}
  if(mode!=='sim')setMode('sim');for(const k in VARS)delete VARS[k];TIM0=0;resetBot();
  tok++;const my=tok;W=[];done=false;err=null;calls=0;out.textContent='';Sk.hardInterrupt=false;
  Sk.configure({output:x=>{out.textContent=(out.textContent+x).slice(-4000);out.scrollTop=out.scrollHeight;},read:rd,__future__:Sk.python3,yieldLimit:300});
@@ -1454,13 +1529,13 @@ function brickMsg(t,c){const cs=cells(t,c),save=parts;
  for(const q of cs)if(q.i<0||q.i>=NI||q.j<0||q.j>=NJ||q.k>=6)return 'A peça sai da área de montagem.';
  parts=save.slice();
  try{for(const q of cs){const m=placeMsg('block',q);if(m&&!/encaixar/.test(m))return m;parts.push({t:'brick',i:q.i,j:q.j,k:q.k});}
-  if(save.length&&dropOrphans())return 'A peça precisa encaixar em outra: clique numa face de uma peça já montada.';}
+  }
  finally{parts=save;}
  return '';}
 window.brickClick=c=>{
- if(partTool==='erase'){const q=parts.find(x=>x.i===c.i&&x.j===c.j&&(x.k||0)===c.k);if(!q||!q.g)return false;snap();parts=parts.filter(x=>x.g!==q.g);dropOrphans();buildRobot();status('Peça removida.');return true;}
+ if(partTool==='erase'){const q=parts.find(x=>x.i===c.i&&x.j===c.j&&(x.k||0)===c.k);if(!q||!q.g)return false;snap();parts=parts.filter(x=>x.g!==q.g);buildRobot();status('Peça removida.');return true;}
  if(partTool==='paint'){const q=parts.find(x=>x.i===c.i&&x.j===c.j&&(x.k||0)===c.k);if(!q||(q.t!=='block'&&q.t!=='brick')){status('Clique num bloco ou numa viga para pintar.');return true;}snap();const set=x=>{if(col<0){if(x.t==='brick')x.c=0;else delete x.c;}else x.c=col;};if(q.g)parts.filter(x=>x.g===q.g).forEach(set);else set(q);buildRobot();return true;}
- if(partTool==='block'){if(col<0)return false;const msg=placeMsg('block',c);if(msg){status(msg);return true;}snap();parts=parts.filter(q=>!(q.i===c.i&&q.j===c.j&&(q.k||0)===c.k));parts.push({t:'block',i:c.i,j:c.j,k:c.k,c:col});const dd=dropOrphans();buildRobot();if(dd)status(dd+' peça(s) solta(s) foram removidas. Use Desfazer para voltar.');return true;}
+ if(partTool==='block'){if(col<0)return false;const msg=placeMsg('block',c);if(msg){status(msg);return true;}snap();parts=parts.filter(q=>!(q.i===c.i&&q.j===c.j&&(q.k||0)===c.k));parts.push({t:'block',i:c.i,j:c.j,k:c.k,c:col});buildRobot();return true;}
  if(!isB(partTool))return false;
  const m=brickMsg(partTool,c);if(m){status(m);return true;}
  snap();const g=Math.max(0,...parts.map(x=>x.g||0))+1;for(const q of cells(partTool,c))parts.push({t:'brick',sh:partTool.slice(5),g,c:col<0?0:col,i:q.i,j:q.j,k:q.k});buildRobot();return true;};
@@ -1476,12 +1551,12 @@ function ghost(e){if(mode==='build'&&partTool==='paint'){const c=cellAt(e);if(c)
  if(mode!=='build'||!isB(partTool)){h2.forEach(h=>h.visible=false);return;}
  const c=cellAt(e);if(!c){h2.forEach(h=>h.visible=false);return;}
  const cs=cells(partTool,c),m=brickMsg(partTool,c);hov.visible=true;
- [hov,...h2].forEach((h,n)=>{h.visible=n<cs.length;if(n<cs.length)h.position.set((cs[n].i-CX)*2,3+2*cs[n].k+body.position.y,(cs[n].j-CY)*2);});hov.material.color.set(m?0xdc2626:0x2563eb);}
+ [hov,...h2].forEach((h,n)=>{h.visible=n<cs.length;if(n<cs.length)h.position.set((cs[n].i-CX)*2,3+2*cs[n].k+body.position.y,(cs[n].j-CY)*2);});const lone=!m&&parts.length>0&&!cs.some(c=>parts.some(q=>linked({t:'brick',i:c.i,j:c.j,k:c.k},q)));hov.material.color.set(m?0xdc2626:lone?0xf59e0b:0x2563eb);}
 view.addEventListener('pointermove',e=>{last=e;ghost(e);});
 const sel=$('brCol');sel.add(new Option('Cor padrão',-1));COLS.forEach((c,i)=>sel.add(new Option(c[0],i)));sel.onchange=()=>{col=+sel.value;};
-const turn=()=>{rot=(rot+1)%4;if(last)ghost(last);};
-$('brRot').onclick=turn;
-document.addEventListener('keydown',e=>{if((e.key==='r'||e.key==='R')&&mode==='build'&&isB(partTool)&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))turn();});
+const turn=(d=1)=>{rot=(rot+d+4)%4;$('brRot').textContent='↻ Girar (R) '+rot*90+'°';if(last)ghost(last);status('Peça girada: '+rot*90+'°. Pressione R para girar de novo (Shift+R gira ao contrário).');};
+$('brRot').onclick=()=>turn();
+document.addEventListener('keydown',e=>{if(!/^[rR]$/.test(e.key)||e.ctrlKey||e.metaKey||e.altKey||mode!=='build')return;const tg=e.target,tn=tg.tagName;if(tn==='TEXTAREA'||(tn==='INPUT'&&tg.type!=='checkbox'))return;if(!isB(partTool)){status('Esta peça não precisa girar. A tecla R gira vigas, peça L e bloco 2×2.');return;}e.preventDefault();if(tn==='SELECT')tg.blur();turn(e.shiftKey?-1:1);});
 document.addEventListener('click',()=>setTimeout(()=>{$('brTools').style.display=isC(partTool)?'':'none';if(!isB(partTool))h2.forEach(h=>h.visible=false);},0));
 })();
 /* ---------- Salvar e abrir código Python (.py) ---------- */
@@ -1499,8 +1574,8 @@ $('rbSave').onclick=saveRobot;$('rbOpen').onclick=()=>$('rbFile').click();
 $('rbFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();
   r.onload=()=>{try{loadRobotData(JSON.parse(r.result),f.name);}catch(x){status('Arquivo inválido: escolha um arquivo .robosim salvo por este simulador.');}};r.readAsText(f);};
 
-function fit(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();}
-new ResizeObserver(fit).observe(view);
+function fit(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();const sd=$('side'),col=document.querySelector('main').classList.contains('cl')&&!String($('rowBuild').style.display).includes('flex'),sw=(innerWidth>760&&sd&&!col)?sd.offsetWidth+12:0;if(sw)camera.setViewOffset(w,h,sw/2,0,w,h);else camera.clearViewOffset();}
+new ResizeObserver(fit).observe(view);new ResizeObserver(fit).observe($('side'));
 
 /* ---------- Novidades e reporte de bugs ---------- */
 const APP_VER='2026.10.24',BUG_FORM='https://forms.gle/VAFQdgK1jBVsV51D6';  /* coloque aqui o e-mail que vai receber os relatórios */
@@ -1667,6 +1742,17 @@ function obrFromTiles(){const st=TILES.find(t=>t.type==='start');OBR.on=!!st;OBR
   if(gl){const c=tCenter(gl);OBR.fin={x:c[0],z:c[1]};}OBR.tris=objs.filter(o=>o.t==='tri');obrReset();}
 $('stop').addEventListener('click',()=>{if(OBR.on&&!OBR.ended&&OBR.t>3)obrEnd('manual');});
 buildRobot();refresh();loadLevel(1);setMode('sim');fit();requestAnimationFrame(frame);
+</script>
+<script>
+(function(){const $=id=>document.getElementById(id),sel=$('tutSel'),list=$('lsList'),tut=$('tut'),mn=document.querySelector('main');
+$('toolFold').onclick=()=>{const c=mn.classList.toggle('tc');$('toolFold').textContent=c?'▶':'◀';$('toolFold').title=c?'Expandir ferramentas':'Recolher ferramentas';};
+function build(){const cur=+sel.value||1,max=sel.options.length;let total=max;try{total=LV.length}catch(e){}
+ const ic=i=>{try{return KID[i].ic}catch(e){return '🎯'}},nm=i=>{try{return LV[i].n}catch(e){const o=sel.options[i];return o?o.text.split('— ')[1]||'':''}};
+ let h='';for(let i=0;i<total;i++){const lk=i>=max,c=i+1===cur;h+='<button class="lc'+(c?' cur':'')+(lk?' lock':'')+'" data-n="'+(i+1)+'"'+(lk?' disabled':'')+'><span class="ic">'+(lk?'🔒':ic(i))+'</span><span class="tx"><i>Fase '+(i+1)+(i+1<cur?' ✔':'')+'</i>'+nm(i)+'</span></button>';}
+ if(h===build.k)return;build.k=h;list.innerHTML=h;const c=list.querySelector('.cur');if(c)list.scrollTo({left:Math.max(0,c.offsetLeft-list.clientWidth/2+c.offsetWidth/2),behavior:'smooth'});}
+list.onclick=e=>{const b=e.target.closest('.lc');if(!b||b.disabled)return;sel.value=b.dataset.n;sel.dispatchEvent(new Event('change'));};
+$('lsPrev').onclick=()=>list.scrollBy({left:-320,behavior:'smooth'});$('lsNext').onclick=()=>list.scrollBy({left:320,behavior:'smooth'});
+setInterval(()=>{const on=getComputedStyle(tut).display!=='none';mn.classList.toggle('nl',!on);if(on)build();},400);})();
 </script>
 </body>
 </html>
