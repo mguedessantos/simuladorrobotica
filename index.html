@@ -342,6 +342,7 @@ main.cl .ctl{writing-mode:vertical-rl;white-space:nowrap}
 #pyed{background:transparent;color:transparent;caret-color:var(--ink);resize:none;outline:0}
 #pyed::selection{background:rgba(59,130,246,.35);color:transparent}
 .tk{color:var(--tk);font-weight:700}.tb{color:var(--tb)}.ta{color:var(--ta)}.tf{color:var(--tf);font-weight:700}.ts{color:var(--ts)}.tc{color:var(--tc);font-style:italic}.tn{color:var(--tn)}.tv{color:var(--tv)}#pyout{margin:0;max-height:96px;min-height:40px;overflow:auto;padding:6px 12px;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;border-top:1px solid var(--line);white-space:pre-wrap}#pyref{border-top:1px solid var(--line);padding:4px 12px;font-size:12px}#pyref pre{margin:6px 0;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;overflow:auto;max-height:170px}main.cl #pyw,main.cl #pyTog,main.cl #exTog{display:none}
+#pyb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:6px 12px;border-bottom:1px solid var(--line);background:var(--bg)}#pyb input[type=text]{width:150px}
 #exw{display:none;flex:0 0 auto;max-height:42%;overflow:auto;border-bottom:1px solid var(--line);background:var(--bg);padding:6px 12px 10px;font-size:13px;color:var(--ink)}#exw.on{display:block}
 #exw summary{cursor:pointer;padding:3px 0}#exw .gh{font-weight:700;margin:10px 0 2px;color:var(--ink-dark)}#exw .gh:first-child{margin-top:2px}
 #exw .bd{padding:2px 0 8px 26px;line-height:1.55}#exw .pr,#exw .rq{font-size:12px;color:var(--mute);margin-top:3px}#exw .dc{margin-top:4px}#exw .dc summary{font-size:12px}
@@ -375,7 +376,7 @@ main.cl .ctl{writing-mode:vertical-rl;white-space:nowrap}
   <section class="card">
     <div class="ct"><button id="blkFold" title="Recolher blocos">◀</button><span class="ctl">🧩 Programação em blocos</span><span class="sp"></span><button id="pyTog" title="Escrever código em Python">🐍 Python</button><button id="exTog" title="Lista de exercícios de Python">📝 Exercícios</button><button id="tutClr" title="Apagar todos os blocos">🧹 Limpar blocos</button></div>
     <div id="blocks"></div>
-    <div id="pyw"><div id="exw"></div><div id="pyc"><pre id="pyn" aria-hidden="true"></pre><div id="pyx"><pre id="pyh" aria-hidden="true"></pre><textarea id="pyed" spellcheck="false" wrap="off"></textarea></div></div><pre id="pyout"></pre><details id="pyref"><summary>📖 Comandos do robô</summary><pre>mover("frente", 50)        # frente, tras, esquerda, direita (-100 a 100)
+    <div id="pyw"><div id="exw"></div><div id="pyb"><input type="text" id="pyNm" value="meu_programa" title="Nome do arquivo (sem .py)" maxlength="40"><button id="pySave" title="Baixar o código como arquivo .py (Ctrl+S)">💾 Salvar .py</button><button id="pyOpen" title="Abrir um arquivo .py no editor">📂 Abrir .py</button><input type="file" id="pyFile" accept=".py,text/x-python,text/plain" style="display:none"></div><div id="pyc"><pre id="pyn" aria-hidden="true"></pre><div id="pyx"><pre id="pyh" aria-hidden="true"></pre><textarea id="pyed" spellcheck="false" wrap="off"></textarea></div></div><pre id="pyout"></pre><details id="pyref"><summary>📖 Comandos do robô</summary><pre>mover("frente", 50)        # frente, tras, esquerda, direita (-100 a 100)
 mover_por("frente", 50, 2) # move por 2 s e para
 motores(esq, dir)          # velocidade de cada motor
 parar_motores()
@@ -407,13 +408,14 @@ print("texto", valor)      # aparece na caixa abaixo do editor</pre></details></
     </div>
     <div class="row" id="rowBuild" style="display:none">
       <b>🧱 Peças:</b>
-      <span class="dd"><button class="ddb">🧱 Blocos ▾</button><div class="ddm"><button data-part="block">Bloco</button><button data-part="caster">Rodízio (esfera)</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span>
+      <span class="dd"><button class="ddb">🧱 Blocos ▾</button><div class="ddm"><button data-part="block">Bloco</button><button data-part="caster">Rodízio (esfera)</button><button data-part="brickI">Viga I (1×3)</button><button data-part="brickL">Peça L (3 células)</button><button data-part="pin">Conector (pino)</button><button data-part="brickI5">Viga longa I (1×5)</button><button data-part="brickQ">Bloco 2×2 (4 células)</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span>
+      <span id="brTools" style="display:none"><button id="brRot" title="Girar a peça (tecla R)">↻ Girar</button><select id="brCol" title="Cor da peça"></select></span>
       <span class="dd"><button class="ddb">⚙️ Atuadores ▾</button><div class="ddm"><button data-part="wheel">Motor TT + roda</button><button data-part="servo">Motor servo</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span>
       <span class="dd"><button class="ddb">👁️ Sensores ▾</button><div class="ddm"><button data-part="ultra">Ultrassônico</button><button data-part="color">Sensor de cor</button><button data-part="gyro">Giroscópio</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span>
       <span class="dd"><button class="ddb">🔋 Alimentação ▾</button><div class="ddm"><button data-part="battery">Bateria</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span>
       <span class="sp"></span>
       <button data-part="move">🖐️ Mover</button>
-      <button data-part="erase">🗑️ Apagar</button>
+      <button data-part="paint">🎨 Pintar</button><button data-part="erase">🗑️ Apagar</button>
       <button id="defbot">🤖 Padrão</button>
       <button id="clrbot">✨ Limpar</button>
       <button id="undo">↩️ Desfazer</button>
@@ -486,6 +488,24 @@ print("texto", valor)      # aparece na caixa abaixo do editor</pre></details></
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 <script>
+/* =====================================================================
+   MAPA DO CÓDIGO (veja também o GUIA_DO_CODIGO.md)
+   Tudo está neste arquivo: HTML + CSS no começo, um <script> grande no fim.
+   Procure pelos títulos no formato "---------- Nome ----------" (Ctrl+F) para pular entre as partes:
+     Piso, Terreno e colisões, Cena 3D ........ mesa, paredes, luz, câmera (Three.js)
+     Robô montado por peças ................... parts[], calc(), mkPart(), placeMsg()
+     Sensores ................................ objeto S (luz, cor, ultrassônico)
+     Blocos e Interpretador .................. Blockly + exec()/one()/ev() (sem eval)
+     Simulação ................................ phys(), frame(), OBR (pontuação)
+     Edição com o ponteiro ..................... clique/arraste na arena e na montagem
+     Tutorial ................................ LV[] (fases) e loadLevel()
+     Salvar/abrir robô (.robosim) ............ saveRobot(), loadRobotData()
+     Editor de Python ........................ Skulpt + comandos do robô (api())
+     Cores do Python, Exercícios, Peças Studio, Salvar .py
+     Montagem de arena por ladrilhos ......... TD (tipos de ladrilho), tileObjs()
+   Unidades: 1 célula de montagem = 2 unidades; 1 ladrilho de arena = 30 unidades.
+   Mesa do tutorial: 120 x 80 (metade da largura x metade da altura), centro em (0,0).
+   ===================================================================== */
 const $=id=>document.getElementById(id),DT=1/60,SPD=0.3,PXC=5,NI=11,NJ=13,CX=5,CY=6;
 const cl=x=>Math.max(-100,Math.min(100,+x||0)),status=t=>$('st').textContent=t;
 let parts=[],objs=[],sel=null,mode='sim',partTool='block',aTool='select',RB={};
@@ -576,13 +596,13 @@ function calc(){const w=parts.filter(p=>p.t==='wheel'),n=w.length||1;
   const gy=parts.find(p=>p.t==='gyro'),cw2=parts.find(p=>p.t==='claw');if(gy)lb.set(gy,'GI1');if(cw2)lb.set(cw2,'GR1');RB.lbl=lb;}
 const PM={block:[0x8892a6,()=>new THREE.BoxGeometry(2,2,2),3],wheel:[0x222831,()=>{const g=new THREE.CylinderGeometry(3,3,2,20);g.rotateX(Math.PI/2);return g;},3],
   color:[0x2dc4d6,()=>new THREE.BoxGeometry(1.6,.6,1.6),1.2],ultra:[0x3d7be0,()=>new THREE.BoxGeometry(1.6,2,2.4),3]};
-const MS={block:8,wheel:55,color:5,ultra:9,battery:100,caster:15,claw:20,gyro:3,servo:9};
+const MS={block:8,brick:8,pin:3,wheel:55,color:5,ultra:9,battery:100,caster:15,claw:20,gyro:3,servo:9};
 const mat=c=>new THREE.MeshLambertMaterial({color:c});
 function bx(w,h,d,c,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));m.position.set(x,y,z);return m;}
 function cy(r,l,c,x,y,z,ax){const g=new THREE.CylinderGeometry(r,r,l,16);if(ax==='z')g.rotateX(Math.PI/2);if(ax==='x')g.rotateZ(Math.PI/2);const m=new THREE.Mesh(g,mat(c));m.position.set(x,y,z);return m;}
 const nr=m=>{m.raycast=()=>{};return m;};
 function mkPart(p){const g=new THREE.Group(),t=p.t;
-  if(t==='block'){g.add(bx(2,2,2,0xb8c2d0,0,0,0));for(const a of[-.5,.5])for(const b of[-.5,.5])g.add(nr(cy(.38,.25,0xc9d2de,a,1.12,b)));}
+  if(t==='brick'||t==='pin'){window.mkBrick(g,p);}else if(t==='block'){const bc=window.blkCol?blkCol(p):0xb8c2d0;g.add(bx(2,2,2,bc,0,0,0));for(const a of[-.5,.5])for(const b of[-.5,.5])g.add(nr(cy(.38,.25,p.c>=0?bc:0xc9d2de,a,1.12,b)));}
   else if(t==='wheel'){const s=-inn(p);g.add(cy(3,1.1,0x1f2430,0,0,s*.45,'z'),cy(1.1,1,0xe5e7eb,0,0,s*.5,'z'),bx(3.2,2.4,1,0xf2c315,0,0,-s*.5),cy(.5,1.4,0x8b93a3,-2.4,-.2,-s*.5,'x'),cy(.45,.4,0x2b2f38,-3.3,-.2,-s*.5,'x'));}
   else if(t==='color'){g.add(bx(2,2,2,0xe8ecf2,0,0,0),nr(bx(1.1,.12,1.1,0x2d7ff9,0,1.02,0)),cy(.6,.2,0x161a22,0,-1,0),nr(cy(.16,.1,0xff4d4d,.5,-1.05,.5)),nr(cy(.16,.1,0x4ade80,-.5,-1.05,.5)),nr(cy(.16,.1,0x60a5fa,0,-1.05,-.5)));}
   else if(t==='ultra'){g.add(bx(.4,1.8,2,0x1d6fd8,-.8,0,0));for(const z of[-.5,.5])g.add(cy(.42,1,0xc9ced6,-.1,.1,z,'x'),nr(cy(.3,.1,0x2b2f38,.45,.1,z,'x')));g.add(bx(.3,.25,1,0xd4af37,-.9,-.8,0));}
@@ -621,7 +641,7 @@ function placeMsg(t,c){const at=(i,j,k)=>parts.some(q=>q.i===i&&q.j===j&&(q.k||0
 const selP=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2.5,2.5,2.5)),new THREE.LineBasicMaterial({color:0xf59e0b}));selP.visible=false;scene.add(selP);
 let msel=null;
 function showSel(){selP.visible=!!msel&&mode==='build';if(msel)selP.position.set((msel.i-CX)*2,3+2*(msel.k||0)+body.position.y,(msel.j-CY)*2);}
-function moveMsg(from,c){const save=parts;parts=save.filter(q=>q!==from);let m=placeMsg(from.t,c);
+function moveMsg(from,c){if(from.g)return 'Vigas e peças L não podem ser movidas: apague e coloque de novo.';const save=parts;parts=save.filter(q=>q!==from);let m=placeMsg(from.t,c);
   if(!m){parts=parts.concat([Object.assign({},from,{i:c.i,j:c.j,k:c.k})]);if(dropOrphans())m='Mover assim soltaria outras peças. Tente outro lugar.';}
   parts=save;return m;}
 function doMove(c){
@@ -991,14 +1011,14 @@ view.addEventListener('pointermove',e=>{if(!drag)return;const p=floorPt(e);if(!p
   if(drag==='draw'){if(sel.t==='line'){sel.x2=p.x;sel.z2=p.z;}else sel.r=Math.hypot(p.x-sel.x,p.z-sel.z);}
   else{shift(sel,p.x-gx,p.z-gz);gx=p.x;gz=p.z;}touch();},true);
 addEventListener('pointerup',e=>{if(drag)controls.enabled=true;drag=null;
-  if(mode==='build'&&down&&e.target===renderer.domElement&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<5){const c=cellAt(e);if(c&&partTool==='move')doMove(c);else if(c){const msg=placeMsg(partTool,c);if(msg)status(msg);else{snap();parts=parts.filter(q=>!(q.i===c.i&&q.j===c.j&&(q.k||0)===c.k));if(partTool!=='erase')parts.push({t:partTool,i:c.i,j:c.j,k:c.k});const d=dropOrphans();buildRobot();if(d)status(d+' peça(s) solta(s) foram removidas. Use Desfazer para voltar.');}}const p=null;
+  if(mode==='build'&&down&&e.target===renderer.domElement&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<5){const c=cellAt(e);if(c&&partTool==='move')doMove(c);else if(c&&window.brickClick&&brickClick(c)){}else if(c){const msg=placeMsg(partTool,c);if(msg)status(msg);else{snap();parts=parts.filter(q=>!(q.i===c.i&&q.j===c.j&&(q.k||0)===c.k));if(partTool!=='erase')parts.push({t:partTool,i:c.i,j:c.j,k:c.k});const d=dropOrphans();buildRobot();if(d)status(d+' peça(s) solta(s) foram removidas. Use Desfazer para voltar.');}}const p=null;
     if(p){const i=Math.round(p.x/2+CX),j=Math.round(p.z/2+CY);
       if(i>=0&&i<NI&&j>=0&&j<NJ){parts=parts.filter(q=>!(q.i===i&&q.j===j));if(partTool!=='erase')parts.push({t:partTool,i,j});buildRobot();}}}
   down=null;});
 function cellAt(e){const r=renderer.domElement.getBoundingClientRect();nd.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(nd,camera);
   const h=ray.intersectObjects([bplane,...body.children],true)[0];if(!h)return null;let i,j,k=0;
   if(h.object===bplane){i=Math.round(h.point.x/2+CX);j=Math.round(h.point.z/2+CY);}
-  else{i=h.object.userData.i;j=h.object.userData.j;k=h.object.userData.k;if(partTool==='move'&&msel&&i===msel.i&&j===msel.j&&k===(msel.k||0))return{i,j,k};if(!(partTool==='erase'||partTool==='move'&&!msel)){const n=h.face.normal.clone().transformDirection(h.object.matrixWorld);if(n.y>.5)k++;else 
+  else{i=h.object.userData.i;j=h.object.userData.j;k=h.object.userData.k;if(partTool==='move'&&msel&&i===msel.i&&j===msel.j&&k===(msel.k||0))return{i,j,k};if(!(partTool==='erase'||partTool==='paint'||partTool==='move'&&!msel)){const n=h.face.normal.clone().transformDirection(h.object.matrixWorld);if(n.y>.5)k++;else 
     if(Math.abs(n.y)<.5){if(Math.abs(n.x)>Math.abs(n.z))i+=Math.sign(n.x);else j+=Math.sign(n.z);}}}
   return i>=0&&i<NI&&j>=0&&j<NJ&&k>=0&&k<6?{i,j,k}:null;}
 view.addEventListener('pointermove',e=>{if(mode!=='build'){hov.visible=false;return;}const c=cellAt(e);hov.visible=!!c;if(c){hov.position.set((c.i-CX)*2,3+2*c.k+body.position.y,(c.j-CY)*2);const mm=partTool==='move'?(msel?moveMsg(msel,c):(parts.some(q=>q.i===c.i&&q.j===c.j&&(q.k||0)===c.k)?'':'x')):placeMsg(partTool,c);hov.material.color.set(mm?0xdc2626:0x2563eb);}});
@@ -1222,12 +1242,13 @@ $('tutBtn').onclick=()=>tutToggle(!TUT.on);
 /* ---------- Salvar / abrir robô em arquivo (.robosim) ---------- */
 const slug=s=>(s||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'meu-robo';
 function saveRobot(){const name=$('rnm').value.trim()||'Meu robô',fn=slug(name)+'.robosim';
-  const data={app:'RoboSim3D',versao:1,nome:name,fase:TUT.lvl,faseMaxima:TUT.max,pecas:parts,frente:FR,blocos:Blockly.serialization.workspaces.save(ws),salvoEm:new Date().toISOString()};
+  const data={app:'RoboSim3D',versao:1,nome:name,fase:TUT.lvl,faseMaxima:TUT.max,pecas:parts,frente:FR,blocos:Blockly.serialization.workspaces.save(ws),python:$('pyed')?$('pyed').value:'',exercicios:window.exGet?exGet():{},salvoEm:new Date().toISOString()};
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download=fn;document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),4000);status('Robô salvo no arquivo "'+fn+'" (pasta Downloads). Use 📂 Abrir robô para continuar depois.');}
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);status('Robô, blocos, código Python e progresso salvos no arquivo "'+fn+'" (pasta Downloads). Use 📂 Abrir robô para continuar depois.');}
 function loadRobotData(o,fn){if(!o||o.app!=='RoboSim3D'||!Array.isArray(o.pecas))throw new Error('formato');
-  sim.running=false;FR=((o.frente|0)%4+4)%4;parts=o.pecas.filter(p=>p&&MS[p.t]!==undefined).map(p=>({t:p.t,i:p.i|0,j:p.j|0,k:p.k|0}));dropOrphans();hist.length=0;msel=null;
+  sim.running=false;FR=((o.frente|0)%4+4)%4;parts=o.pecas.filter(p=>p&&MS[p.t]!==undefined).map(p=>{const q={t:p.t,i:p.i|0,j:p.j|0,k:p.k|0};if(p.g)q.g=p.g|0;if(p.sh)q.sh=String(p.sh).slice(0,3);if(p.c>=0)q.c=p.c|0;return q;});dropOrphans();hist.length=0;msel=null;
   for(const k in VARS)delete VARS[k];ws.clear();if(o.blocos)Blockly.serialization.workspaces.load(o.blocos,ws);
+  if(typeof o.python==='string'&&$('pyed')){$('pyed').value=o.python;$('pyed').dispatchEvent(new Event('input'));}if(o.exercicios&&typeof o.exercicios==='object'&&window.exSet)exSet(o.exercicios);
   $('rnm').value=o.nome||'';TUT.max=Math.max(TUT.max,o.faseMaxima|0,o.fase|0);
   if(TUT.on)loadLevel(o.fase|0||1);else{buildRobot();resetBot();}
   status('Robô "'+(o.nome||fn)+'" carregado'+(TUT.on?' — continuando na fase '+TUT.lvl+'.':'.'));}
@@ -1246,6 +1267,17 @@ $('arFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)retur
   r.onload=()=>{try{loadArenaData(JSON.parse(r.result),f.name);}catch(x){status('Arquivo inválido: escolha um arquivo .arena salvo por este simulador.');}};r.readAsText(f);};
 $('tutFold').onclick=()=>{const t=$('tut'),f=t.classList.toggle('fold');$('tutFold').textContent=f?'▸':'▾';setTimeout(fit,0);};
 /* ---------- Editor de Python (Skulpt) que controla o robô ---------- */
+/* COMO FUNCIONA:
+   - O Skulpt roda o Python no navegador. Cada comando do robô (mover, esperar...) é uma
+     função JS registrada em Sk.builtins dentro de api(), recriada a cada execução.
+   - def(nome, fn): comando comum (devolve o resultado na hora). defW(nome, fn): comando que
+     espera (fn devolve uma Promise, ex.: esperar, mover_por).
+   - O programa Python não roda sozinho: gen(my) é um gerador entregue ao simulador (sim.gen).
+     A cada passo da simulação ele libera as esperas (W) cujo tempo (sim.time) já chegou.
+   - calls: depois de 8 comandos no mesmo passo o programa é obrigado a esperar o próximo
+     passo (evita travar o navegador em while True sem esperar).
+   - tok: número da execução atual. Parar/Reiniciar soma 1 e as execuções antigas se encerram.
+   - pyRun() é chamado pelo botão Executar quando o editor de Python está aberto. */
 (function(){
 let on=false,tok=0,calls=0,W=[],done=false,err=null;
 const ed=$('pyed'),out=$('pyout'),NONE=()=>Sk.builtin.none.none$;
@@ -1259,6 +1291,11 @@ const needC=n=>{const k=+n||1;if(!RB.sens||!RB.sens[k-1])bad('O sensor de cor SC
 const needU=()=>{if(!RB.ultra)bad('O sensor ultrassônico não está montado no robô.');};
 const needG=()=>{if(!RB.gyro)bad('O giroscópio não está montado no robô.');};
 const needK=()=>{if(!RB.claw)bad('O robô não tem garra montada.');};
+/* COMO ADICIONAR UM COMANDO NOVO EM PYTHON (3 passos):
+   1) SIG: escreva o nome e os nomes dos argumentos (usados nas mensagens de erro).
+   2) val(): se o comando tem limites (faixa de números, palavras aceitas), confira aqui.
+   3) api(): registre com def('nome', (a,b)=>{ ...; return valor; }) ou defW(...) se esperar.
+   Depois: acrescente em 'API' (cores do editor) e na lista "Comandos do robô" (HTML #pyref). */
 const SIG={mover:['direcao','velocidade'],mover_por:['direcao','velocidade','segundos'],motores:['esquerdo','direito'],parar_motores:[],esperar:['segundos'],sensor_cor:['numero_do_sensor'],luz:['numero_do_sensor'],distancia:[],giroscopio:[],rotacao_motor:['motor'],zerar_rotacao:[],garra:['acao'],servo_garra:['graus'],garra_segurando:[],objeto_na_garra:[],vitimas:[],temporizador:[],resetar_temporizador:[]};
 function val(n,a){const sg=SIG[n]||[],E=(T,m)=>{throw new Sk.builtin[T](m);};
  if(a.length!==sg.length)E('TypeError',n+'() precisa de '+sg.length+' argumento(s)'+(sg.length?' ('+sg.join(', ')+')':'')+', mas recebeu '+a.length+'.');
@@ -1322,6 +1359,12 @@ ed.value='# Programa em Python para o robô\nprint("Olá, robô!")\n\nmover("fre
 ed.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();document.execCommand('insertText',false,'    ');}
  else if(e.key==='Enter'){const v=ed.value,s=ed.selectionStart,ls=v.lastIndexOf('\n',s-1)+1,ln=v.slice(ls,s),ind=ln.match(/^ */)[0]+(/:\s*$/.test(ln)?'    ':'');e.preventDefault();document.execCommand('insertText',false,'\n'+ind);}});
 })();
+/* COMO FUNCIONAM AS CORES: o textarea (#pyed) fica transparente por cima de um <pre> (#pyh)
+   que recebe o mesmo texto já colorido por hl(). A rolagem dos dois e do #pyn (números de
+   linha) é sincronizada em sync(). Para mudar as cores, edite as variáveis --tk (palavra-chave),
+   --tb (função do Python), --ta (comando do robô), --tf (função sua), --ts (texto),
+   --tc (comentário), --tn (número), --tv (variável) no CSS de #pyc. As duas fontes
+   (#pyh e #pyed) PRECISAM ter exatamente a mesma fonte, tamanho e espaçamento. */
 /* ---------- Numeração de linhas e cores do Python (estilo Thonny) ---------- */
 (function(){const ed=$('pyed'),h=$('pyh'),nn=$('pyn');
 const KW=new Set('False None True and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield'.split(' ')),
@@ -1341,6 +1384,10 @@ function hl(src){let prev='',dot=false;return src.replace(RE,(m,c,s,nm,id,ch,off
 const sync=()=>{h.scrollTop=nn.scrollTop=ed.scrollTop;h.scrollLeft=ed.scrollLeft;};
 const draw=()=>{const v=ed.value;h.innerHTML=hl(v)+'\n';const c=v.split('\n').length;let t='';for(let i=1;i<=c;i++)t+=i+'\n';nn.textContent=t;sync();};
 ed.addEventListener('input',draw);ed.addEventListener('scroll',sync);draw();})();
+/* COMO ADICIONAR/EDITAR EXERCÍCIOS: ROWS é uma lista de linhas no formato
+   [número, grupo, título, enunciado, 'pronto quando', 'precisa de', dica]  (HTML permitido).
+   ARE guarda as arenas prontas e PRE liga o número do exercício à arena (ex.: 8:'parede').
+   O progresso fica em localStorage na chave 'robosim_ex' e também vai dentro do .robosim. */
 /* ---------- Lista de exercícios de Python ---------- */
 (function(){const G1='Bloco 1 · variáveis, print e if',G2='Bloco 2 · laços e listas',G3='Bloco 3 · funções',G4='Bloco 4 · integração',G5='Desafios extras';
 const ROWS=[
@@ -1369,14 +1416,83 @@ const EX=ROWS.map(r=>({id:r[0],g:r[1],t:r[2],e:r[3],p:r[4],r:r[5],d:r[6]})),KEY=
 let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}};
 const count=()=>{$('exN').textContent=EX.filter(x=>done[x.id]).length+' de '+EX.length+' concluídos';};
+const LVO=n=>{const l=LV.find(x=>x.n===n);return l?l.objs():[];};
+const ARE={parede:{n:'Parede à frente',o:()=>[WALL(55,0,60,Math.PI/2)]},
+ livre:{n:'Arena livre',o:()=>[],s:{x:-40,z:0,a:0}},
+ cores:{n:'Faixas preta e verde no chão',o:()=>[{t:'tape',x:-10,z:0,w:12,d:70,c:'#111111'},{t:'tape',x:30,z:0,w:12,d:70,c:'#1fa34a'}]},
+ linha:{n:'Pista de seguir a linha',o:()=>LVO('Seguir a linha')},
+ obst:{n:'Linha com obstáculo',o:()=>LVO('Obstáculo na linha')},
+ cruz:{n:'Linha reta com três marcas verdes',o:()=>[...Poly([[-108,0],[98,0]]),{t:'tape',x:-60,z:-4,w:4,d:5.5,c:'#1fa34a'},{t:'tape',x:-10,z:-4,w:4,d:5.5,c:'#1fa34a'},{t:'tape',x:40,z:-4,w:4,d:5.5,c:'#1fa34a'}]}};
+const PRE={1:'parede',2:'livre',3:'livre',4:'parede',5:'cores',6:'livre',7:'livre',8:'parede',9:'livre',10:'parede',11:'livre',12:'livre',13:'parede',14:'livre',15:'linha',16:'obst',17:'linha',19:'linha',20:'cruz'};
+function loadEx(id){const P=ARE[PRE[id]];if(!P)return;if(TUT.on){TUT.on=false;TUT.pause=false;tutUI();}
+ sim.running=false;OBR.on=false;setArena(120,80);objs=P.o().map(o=>Object.assign({},o));Object.assign(START,P.s||{x:-108,z:0,a:0});sel=null;touch();resetBot();if(mode!=='sim')setMode('sim');
+ status('Arena do exercício '+id+' carregada: '+P.n+'. Seu robô foi colocado na posição inicial.');}
 function render(){let h='<div class="gh">📝 Lista de exercícios · <span id="exN"></span> <button id="exClr" style="margin-left:8px">Limpar progresso</button></div>',g='';
  for(const x of EX){if(x.g!==g){g=x.g;h+='<div class="gh">'+g+'</div>';}
-  h+='<details'+(done[x.id]?' class="dn"':'')+'><summary><input type="checkbox" data-c="'+x.id+'"'+(done[x.id]?' checked':'')+'><span class="t">'+x.id+'. '+x.t+'</span></summary><div class="bd">'+x.e+'<div class="pr"><b>Pronto quando:</b> '+x.p+'</div>'+(x.r?'<div class="rq"><b>Precisa de:</b> '+x.r+'</div>':'')+(x.d?'<details class="dc"><summary>💡 Dica</summary>'+x.d+'</details>':'')+'</div></details>';}
+  h+='<details'+(done[x.id]?' class="dn"':'')+'><summary><input type="checkbox" data-c="'+x.id+'"'+(done[x.id]?' checked':'')+'><span class="t">'+x.id+'. '+x.t+'</span></summary><div class="bd">'+x.e+'<div class="pr"><b>Pronto quando:</b> '+x.p+'</div>'+(x.r?'<div class="rq"><b>Precisa de:</b> '+x.r+'</div>':'')+(PRE[x.id]?'<div class="rq"><button data-a="'+x.id+'">🏟️ Carregar arena: '+ARE[PRE[x.id]].n+'</button></div>':'')+(x.d?'<details class="dc"><summary>💡 Dica</summary>'+x.d+'</details>':'')+'</div></details>';}
  box.innerHTML=h;count();}
 box.addEventListener('change',e=>{const c=e.target.dataset&&e.target.dataset.c;if(!c)return;if(e.target.checked)done[c]=1;else delete done[c];save();e.target.closest('details').classList.toggle('dn',e.target.checked);count();});
-box.addEventListener('click',e=>{if(e.target.id==='exClr'){done={};save();render();}});
+box.addEventListener('click',e=>{const a=e.target.dataset&&e.target.dataset.a;if(a)loadEx(+a);if(e.target.id==='exClr'){done={};save();render();}});
+window.exGet=()=>done;window.exSet=d=>{done={};for(const k in d)if(d[k])done[k]=1;save();render();};
 $('exTog').onclick=()=>{if(!(window.PYM&&PYM()))$('pyTog').click();const on=box.classList.toggle('on');$('exTog').classList.toggle('pri',on);};
 render();})();
+/* COMO FUNCIONAM AS PEÇAS DE VÁRIAS CÉLULAS: o robô é uma lista parts[] com uma entrada por célula.
+   Viga/L/2x2 são várias entradas {t:'brick', g:<id do grupo>, c:<cor>, i, j, k}. Quem tem o mesmo
+   g é a mesma peça (apagar e pintar agem no grupo todo).
+   - cells(tipo, clique): quais células a peça ocupa na rotação atual (rot 0 a 3).
+   - brickMsg(): valida (dentro da mesa, célula livre, peça encaixada); devolve '' se pode.
+   - brickClick(): chamado pelo clique da montagem; coloca, apaga ou pinta.
+   - mkBrick(): desenha uma célula (chamado de mkPart). blkCol(): cor do bloco comum.
+   Para criar outro formato: some o tipo em isB(), em cells() e no menu HTML (data-part). */
+/* ---------- Peças estilo Studio: viga I, peça L e conector ---------- */
+(function(){const COLS=[['Vermelho',0xd01012],['Azul',0x0b5fc7],['Amarelo',0xf2c315],['Verde',0x1f9e4a],['Laranja',0xf47b20],['Branco',0xf2f3f2],['Preto',0x1b2a34],['Cinza',0x9ba19d]],DIRS=[[1,0],[0,1],[-1,0],[0,-1]];
+let rot=0,col=-1,last=null;
+const isB=t=>t==='brickI'||t==='brickI5'||t==='brickL'||t==='brickQ',isC=t=>isB(t)||t==='block'||t==='paint';
+const cells=(t,c)=>{const d=DIRS[rot],p=DIRS[(rot+1)%4],at=(a,b)=>({i:c.i+d[0]*a+p[0]*b,j:c.j+d[1]*a+p[1]*b,k:c.k});
+ if(t==='brickI')return[0,1,2].map(n=>at(n,0));if(t==='brickI5')return[0,1,2,3,4].map(n=>at(n,0));if(t==='brickQ')return[at(0,0),at(1,0),at(0,1),at(1,1)];return[at(0,0),at(1,0),at(0,1)];};
+function brickMsg(t,c){const cs=cells(t,c),save=parts;
+ for(const q of cs)if(q.i<0||q.i>=NI||q.j<0||q.j>=NJ||q.k>=6)return 'A peça sai da área de montagem.';
+ parts=save.slice();
+ try{for(const q of cs){const m=placeMsg('block',q);if(m&&!/encaixar/.test(m))return m;parts.push({t:'brick',i:q.i,j:q.j,k:q.k});}
+  if(save.length&&dropOrphans())return 'A peça precisa encaixar em outra: clique numa face de uma peça já montada.';}
+ finally{parts=save;}
+ return '';}
+window.brickClick=c=>{
+ if(partTool==='erase'){const q=parts.find(x=>x.i===c.i&&x.j===c.j&&(x.k||0)===c.k);if(!q||!q.g)return false;snap();parts=parts.filter(x=>x.g!==q.g);dropOrphans();buildRobot();status('Peça removida.');return true;}
+ if(partTool==='paint'){const q=parts.find(x=>x.i===c.i&&x.j===c.j&&(x.k||0)===c.k);if(!q||(q.t!=='block'&&q.t!=='brick')){status('Clique num bloco ou numa viga para pintar.');return true;}snap();const set=x=>{if(col<0){if(x.t==='brick')x.c=0;else delete x.c;}else x.c=col;};if(q.g)parts.filter(x=>x.g===q.g).forEach(set);else set(q);buildRobot();return true;}
+ if(partTool==='block'){if(col<0)return false;const msg=placeMsg('block',c);if(msg){status(msg);return true;}snap();parts=parts.filter(q=>!(q.i===c.i&&q.j===c.j&&(q.k||0)===c.k));parts.push({t:'block',i:c.i,j:c.j,k:c.k,c:col});const dd=dropOrphans();buildRobot();if(dd)status(dd+' peça(s) solta(s) foram removidas. Use Desfazer para voltar.');return true;}
+ if(!isB(partTool))return false;
+ const m=brickMsg(partTool,c);if(m){status(m);return true;}
+ snap();const g=Math.max(0,...parts.map(x=>x.g||0))+1;for(const q of cells(partTool,c))parts.push({t:'brick',sh:partTool.slice(5),g,c:col<0?0:col,i:q.i,j:q.j,k:q.k});buildRobot();return true;};
+window.mkBrick=(g,p)=>{
+ if(p.t==='pin'){g.add(bx(2,2,2,0x4b5563,0,0,0),nr(cy(.5,3.4,0x1d6fd8,0,0,0,'x')),nr(cy(.7,.3,0x1d6fd8,1.75,0,0,'x')),nr(cy(.7,.3,0x1d6fd8,-1.75,0,0,'x')),nr(cy(.38,.25,0x6b7280,0,1.12,0)));return;}
+ const cc=(COLS[p.c||0]||COLS[0])[1];g.add(bx(2,2,2,cc,0,0,0),nr(cy(.6,.4,cc,0,1.2,0)));
+ const nb=(di,dj)=>parts.some(q=>q.g&&q.g===p.g&&q.i===p.i+di&&q.j===p.j+dj&&(q.k||0)===(p.k||0)),lm=new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:.35});
+ for(const[di,dj]of DIRS){if(nb(di,dj))continue;const f=dotF(di,dj),l=dotL(di,dj),pts=f?[[f,1.01,-1],[f,1.01,1]]:[[-1,1.01,l],[1,1.01,l]];
+  g.add(nr(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts.map(a=>new THREE.Vector3(a[0],a[1],a[2]))),lm)));}};
+window.blkCol=p=>p.c>=0&&COLS[p.c]?COLS[p.c][1]:0xb8c2d0;
+const h2=[hov.clone(),hov.clone(),hov.clone(),hov.clone()];h2.forEach(h=>{h.material=hov.material;h.visible=false;scene.add(h);});
+function ghost(e){if(mode==='build'&&partTool==='paint'){const c=cellAt(e);if(c)hov.material.color.set(parts.some(q=>q.i===c.i&&q.j===c.j&&(q.k||0)===c.k&&(q.t==='block'||q.t==='brick'))?0x2563eb:0xdc2626);}
+ if(mode!=='build'||!isB(partTool)){h2.forEach(h=>h.visible=false);return;}
+ const c=cellAt(e);if(!c){h2.forEach(h=>h.visible=false);return;}
+ const cs=cells(partTool,c),m=brickMsg(partTool,c);hov.visible=true;
+ [hov,...h2].forEach((h,n)=>{h.visible=n<cs.length;if(n<cs.length)h.position.set((cs[n].i-CX)*2,3+2*cs[n].k+body.position.y,(cs[n].j-CY)*2);});hov.material.color.set(m?0xdc2626:0x2563eb);}
+view.addEventListener('pointermove',e=>{last=e;ghost(e);});
+const sel=$('brCol');sel.add(new Option('Cor padrão',-1));COLS.forEach((c,i)=>sel.add(new Option(c[0],i)));sel.onchange=()=>{col=+sel.value;};
+const turn=()=>{rot=(rot+1)%4;if(last)ghost(last);};
+$('brRot').onclick=turn;
+document.addEventListener('keydown',e=>{if((e.key==='r'||e.key==='R')&&mode==='build'&&isB(partTool)&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))turn();});
+document.addEventListener('click',()=>setTimeout(()=>{$('brTools').style.display=isC(partTool)?'':'none';if(!isB(partTool))h2.forEach(h=>h.visible=false);},0));
+})();
+/* ---------- Salvar e abrir código Python (.py) ---------- */
+(function(){const ed=$('pyed'),nm=$('pyNm');
+const sl=s=>(s||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'meu_programa';
+const save=()=>{const fn=sl(nm.value)+'.py',a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ed.value.replace(/\r?\n/g,'\n')],{type:'text/x-python;charset=utf-8'}));a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);status('Código salvo no arquivo "'+fn+'" (pasta Downloads).');};
+$('pySave').onclick=save;$('pyOpen').onclick=()=>$('pyFile').click();
+ed.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();save();}});
+$('pyFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(f.size>500000){status('Arquivo grande demais para o editor (máximo 500 KB).');return;}
+ const r=new FileReader();r.onload=()=>{ed.value=String(r.result).replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n');ed.dispatchEvent(new Event('input'));nm.value=f.name.replace(/\.py$/i,'');status('Arquivo "'+f.name+'" aberto no editor.');};r.readAsText(f,'utf-8');};
+})();
 $('blkFold').onclick=()=>{const m=document.querySelector('main'),c=m.classList.toggle('cl'),rs=()=>{try{Blockly.svgResize(ws);}catch(e){}fit();};
   $('blkFold').textContent=c?'▶':'◀';$('blkFold').title=c?'Expandir blocos':'Recolher blocos';rs();setTimeout(rs,300);};
 $('rbSave').onclick=saveRobot;$('rbOpen').onclick=()=>$('rbFile').click();
@@ -1416,7 +1532,8 @@ const arc=(cx,cz,a0,a1)=>{const r=[];for(let a=a0;a<=a1;a+=15)r.push([cx+15*Math
   elbow:{g:0,n:'Cotovelo (90°)',L:[[[0,15],[0,0],[15,0]]]},tee:{g:0,n:'T',L:[ST,[[0,0],[15,0]]]},cross:{g:0,n:'Cruzamento (+)',L:[ST,[[-15,0],[15,0]]]},
   ramp:{g:0,n:'Rampa (3×1)',ramp:1},
   circ:{g:1,n:'Curva',L:[arc(15,15,180,270)]},duo:{g:1,n:'Curva dupla',L:[arc(15,15,180,270),arc(-15,-15,0,90)]},
-  diag:{g:1,n:'Diagonal',L:[[[0,15],[15,0]]]},duodiag:{g:1,n:'Diagonal dupla',L:[[[0,15],[15,0]],[[0,-15],[-15,0]]]},
+  diag:{g:1,n:'Diagonal curta (quina)',L:[[[0,15],[15,0]]]},duodiag:{g:1,n:'Diagonal dupla',L:[[[0,15],[15,0]],[[0,-15],[-15,0]]]},
+  diag2:{g:1,big2:1,n:'Diagonal 2×2 (liga linhas vizinhas)',L:[[[-15,30],[-15,15],[15,-15],[15,-30]]]},diag2m:{g:1,big2:1,n:'Diagonal 2×2 espelhada',L:[[[15,30],[15,15],[-15,-15],[-15,-30]]]},
   start:{g:2,n:'Início',L:[ST]},rescue:{g:2,n:'Sala de resgate (3×3, fechada)',big:1},door_in:{g:2,n:'Entrada da sala (prata)',door:'in'},door_out:{g:2,n:'Saída da sala (preta)',door:'out'},goal:{g:2,n:'Chegada',L:[ST]},
   box:{g:3,O:1,n:'Caixa (obstáculo)'},bump:{g:3,O:1,n:'Lombada'},chk:{g:3,O:1,n:'Checkpoint'},marker:{g:3,O:1,n:'Marcador verde'}},
  GN=['Caminhos','Curvas','Importantes','Objetos'],GI=['🛤️','↪️','⭐','📦'];
@@ -1427,6 +1544,7 @@ const tCells=t=>{const r=[];for(let a=0;a<t.cw;a++)for(let b=0;b<t.ch;b++)r.push
 const inGrid=t=>t.gx>=0&&t.gz>=0&&t.gx+t.cw<=GW&&t.gz+t.ch<=GH;
 function mkTile(type,cgx,cgz,r){const d=TD[type],n={type,r,cw:1,ch:1,gx:cgx,gz:cgz};
   if(d.big){n.cw=n.ch=3;n.gx=Math.min(Math.max(cgx,0),GW-3);n.gz=Math.min(Math.max(cgz,0),GH-3);n.doors=[];}
+  if(d.big2){n.cw=n.ch=2;n.gx=Math.min(Math.max(cgx,0),GW-2);n.gz=Math.min(Math.max(cgz,0),GH-2);}
   if(d.ramp){n.cw=r%2?1:3;n.ch=r%2?3:1;n.gx=cgx-(n.cw-1)/2;n.gz=cgz-(n.ch-1)/2;}
   return inGrid(n)?n:null;}
 const DC=(side,a,b)=>{const x=cX(a),z=cZ(b);return side==='N'?[x,z-15]:side==='S'?[x,z+15]:side==='W'?[x-15,z]:[x+15,z];};
@@ -1478,7 +1596,7 @@ function thumb(type){const c=document.createElement('canvas');c.width=c.height=4
   else if(d.ramp){g.fillStyle='#f59e0b';g.beginPath();g.moveTo(6,30);g.lineTo(15,12);g.lineTo(25,12);g.lineTo(34,30);g.fill();g.beginPath();g.moveTo(6,21);g.lineTo(34,21);g.stroke();}
   else if(d.big){g.strokeRect(8,8,24,24);g.fillStyle='#111';g.fillRect(8,8,9,9);}
   else if(d.door){g.strokeRect(8,8,24,24);g.strokeStyle=d.door==='in'?'#9ca3af':'#111';g.lineWidth=4;g.beginPath();g.moveTo(20,8);g.lineTo(20,16);g.moveTo(14,8);g.lineTo(26,8);g.stroke();}
-  else for(const l of d.L){g.beginPath();l.forEach((q,i)=>g[i?'lineTo':'moveTo'](20-q[1]*.9,20+q[0]*.9));g.stroke();}
+  else for(const l of d.L){g.beginPath();l.forEach((q,i)=>g[i?'lineTo':'moveTo'](20-q[1]*(d.big2?.45:.9),20+q[0]*(d.big2?.45:.9)));g.stroke();}
   if(type==='goal'){g.strokeStyle='#dc2626';g.lineWidth=4;g.beginPath();g.moveTo(20,8);g.lineTo(20,32);g.stroke();}return c;}
 /* grade, tamanho e previsão de encaixe */
 const gGrp=new THREE.Group(),gM={};scene.add(gGrp);
@@ -1500,7 +1618,7 @@ view.addEventListener('pointermove',e=>{if(mode!=='arena'||!/^t(:|del$|rot$)/.te
     if(near)return ghostDraw([{x:near[1].x,z:near[1].z,w:18,d:18}],[],col);
     const dd=doorAt(p);if(aTool==='tdel'&&dd&&dd.d<12&&dd.t.doors.some(q=>q.a===dd.a&&q.b===dd.b&&q.side===dd.side)){const v=dd.side==='W'||dd.side==='E';return ghostDraw([{x:dd.q[0],z:dd.q[1],w:v?5:24,d:v?24:5}],[],NO);}
     const[a,b]=cellOf(p),t=TILES.find(t=>tCells(t).some(c=>c[0]===a&&c[1]===b));if(!t)return ghostClear();const c=tCenter(t);return ghostDraw([{x:c[0],z:c[1],w:t.cw*30,d:t.ch*30}],[],col);}
-  const type=aTool.slice(2),d=TD[type];
+  const type=aTool.slice(2),d=TD[type];if(!OBR.on&&(AX!==15*GW||AZ!==15*GH))ensureArena();
   if(d.O){const sz={box:[15,15],bump:[5,30],chk:[6,6],marker:[3,3]}[type];return ghostDraw([{x:Math.round(p.x),z:Math.round(p.z),w:sz[0],d:sz[1],a:tileRot*Math.PI/2}],[],inside?OK:NO);}
   if(d.door){const q=doorAt(p);if(q){const v=q.side==='W'||q.side==='E';return ghostDraw([{x:q.q[0],z:q.q[1],w:v?5:24,d:v?24:5}],[],OK);}const[a,b]=cellOf(p);return ghostDraw([{x:cX(a),z:cZ(b),w:30,d:30}],[],NO);}
   const[gx,gz]=cellOf(p),n=mkTile(type,Math.min(Math.max(gx,0),GW-1),Math.min(Math.max(gz,0),GH-1),tileRot),ok=n&&gx>=0&&gx<GW&&gz>=0&&gz<GH;
