@@ -8,28 +8,45 @@ Abra o `index.html` no navegador (é preciso internet, pois as bibliotecas vêm 
 
 ## Novidades
 
-### Editor de Python
-- Botão **🐍 Python** na barra de programação: troca os blocos por um editor onde você digita Python de verdade (variáveis, `if/elif/else`, `for`, `while`, funções, `import random`, `math`).
-- O código controla o robô simulado. Os `print(...)` aparecem na caixa abaixo do editor.
-- Tab recua e Enter mantém a indentação.
+### Programação em Python
+- Botão **🐍 Python** na barra de programação: troca os blocos por um editor onde você digita Python de verdade (variáveis, `if/elif/else`, `for`, `while`, funções, `import random`, `math`). O código controla o robô simulado, e os `print(...)` aparecem na caixa abaixo do editor.
 - Numeração de linhas e cores de sintaxe no estilo Thonny: palavras-chave, funções do Python, comandos do robô, funções criadas por você, variáveis, textos, números e comentários, com versão para tema claro e escuro.
-- Os comandos são da biblioteca do simulador (não existem no Python comum): servem para treinar a lógica e a sintaxe.
+- Tab recua e Enter mantém a indentação.
+- **💾 Salvar .py / 📂 Abrir .py** (acima do editor, ou Ctrl+S): baixa o código como arquivo `.py` com o nome que você escolher (sem acentos e espaços, por exemplo `seguidor_de_linha.py`) e abre um `.py` no editor (até 500 KB). O arquivo é texto puro em UTF-8 e abre no Thonny, mas os comandos do robô (`mover`, `esperar`, `sensor_cor`...) só funcionam dentro do simulador.
+- Os comandos são da biblioteca do simulador (não existem no Python comum): servem para treinar a lógica e a sintaxe. A lista completa, com o significado de cada argumento, está mais abaixo.
+- **Mensagens de erro mais claras:** os comandos conferem os argumentos antes de executar e explicam o problema em português (argumentos a mais ou a menos, direção escrita errada, velocidade fora do limite, número de sensor inválido, texto no lugar de número). Erros do Python (`NameError`, `IndentationError`, erro de sintaxe, `ZeroDivisionError`, `IndexError`, `TypeError`, `ValueError`...) vêm com uma dica 💡 de como corrigir, e nomes digitados errados recebem sugestão ("Você quis dizer 'mover_por'?").
 
 ### Lista de exercícios de Python
-- Botão **📝 Exercícios** (ao lado de 🐍 Python): abre uma lista com 21 exercícios dentro do simulador, acima do editor, para você ler o enunciado enquanto programa.
+- Botão **📝 Exercícios** (ao lado de 🐍 Python): lista com 21 exercícios dentro do simulador, acima do editor, para ler o enunciado enquanto programa.
 - Organizada em 4 blocos (variáveis/print/if, laços e listas, funções, integração) mais 3 desafios extras (controle proporcional, contador de cruzamentos e resgate com garra).
 - Cada exercício mostra o enunciado, "Pronto quando", o que o robô precisa ter montado (sensores) e uma dica opcional, sem a resposta pronta.
+- Botão **🏟️ Carregar arena** nos exercícios que precisam de cenário (parede à frente, faixas de cor no chão, pista de seguir linha, linha com obstáculo, linha com marcas verdes ou arena livre): monta a arena e coloca o robô na posição inicial, sem apagar o robô que você montou. Os exercícios 18 e 21 ficam sem arena pronta (use as fases do tutorial ou a sala da OBR).
 - Caixa para marcar os exercícios concluídos, com contador de progresso. O progresso fica salvo no navegador (se o navegador bloquear o armazenamento, ele só vale até fechar a página).
-
-### Mensagens de erro mais claras
-- Os comandos do robô conferem os argumentos antes de executar e explicam o problema em português (comando com argumentos a menos ou a mais, direção escrita errada, velocidade fora do limite, número de sensor inválido, texto no lugar de número).
-- Erros do Python (`NameError`, `IndentationError`, erro de sintaxe, `ZeroDivisionError`, `IndexError`, `TypeError`, `ValueError`...) vêm com uma dica 💡 de como corrigir.
-- Em nomes digitados errados, o simulador sugere o comando mais parecido ("Você quis dizer 'mover_por'?").
 
 ### Sensores só funcionam se estiverem montados
 - Sensor de cor, ultrassônico, giroscópio e garra não devolvem valores padrão quando não estão no robô.
 - Ao tentar usá-los, o programa para com uma mensagem clara (por exemplo: "O sensor ultrassônico não está montado no robô."), nos blocos e no Python.
 - O painel de dados mostra "não montado" no lugar do antigo 400 cm.
+
+### Salvar e abrir
+- **💾 Salvar / 📂 Abrir** guardam o projeto (robô e arena) neste navegador.
+- **Salvar robô / Abrir robô** (arquivo `.robosim`, para levar entre computadores e passar a colegas e alunos) agora guardam, no mesmo arquivo: as peças do robô (com as cores e as vigas novas), os blocos, o **código Python** do editor, os **exercícios concluídos** e a fase do tutorial. Arquivos antigos continuam abrindo normalmente.
+- **Correção:** abrir um robô salvo não perde mais as cores nem agrupa errado as vigas e peças L.
+- A arena tem seu próprio arquivo (`.arena`).
+
+### Montagem do robô: peças estilo Studio
+- No menu **🧱 Blocos**: **Viga I (1×3)**, **Viga longa I (1×5)**, **Peça L (3 células, a cantoneira)**, **Bloco 2×2 (4 células)** e **Conector (pino)**.
+- Vigas, peça L e bloco 2×2 são peças únicas de várias células: um clique coloca a peça inteira, a pré-visualização mostra todas as células (azul = pode, vermelho = não pode, com a mensagem do motivo) e a ferramenta Apagar remove a peça inteira.
+- **↻ Girar** (ou tecla R) muda a orientação da peça.
+- **Cores no estilo Studio:** o seletor tem 8 cores (vermelho, azul, amarelo, verde, laranja, branco, preto e cinza) e a opção "Cor padrão". Vale também para o bloco comum, e a ferramenta **🎨 Pintar** troca a cor de um bloco ou de uma peça inteira já montada. As cores ficam salvas no projeto e não mudam a física.
+- Cada célula tem um pino em cima, com contorno fino só nas bordas externas da peça.
+- As peças seguem as regras do robô: precisam encaixar em outra peça (face com face) e contam como estrutura, com a massa de um bloco. Vigas, peça L e bloco 2×2 não podem ser movidos com a ferramenta Mover (apague e coloque de novo).
+- O conector é uma peça de uma célula com um pino azul atravessando, para ligar peças ou reforçar a estrutura (por enquanto, sem efeito extra na física).
+
+### Montagem de arena
+- **Diagonal 2×2 (liga linhas vizinhas)** e **Diagonal 2×2 espelhada** (grupo Curvas): ocupam 2×2 ladrilhos e levam a linha de uma fileira para a fileira ao lado, em 45°, entrando e saindo reta. Encaixam em retas horizontais (ou verticais, girando a peça) dos dois lados.
+- A peça antiga virou **Diagonal curta (quina)**: ela liga o meio de uma borda ao meio da borda vizinha, como um cotovelo com a quina cortada. Para conectar, o ladrilho ao lado precisa ter a saída voltada para ela (gire-o com a ferramenta de girar).
+- **Correção:** ao passar o mouse com uma peça selecionada, o simulador agora ajusta o tamanho da mesa à grade de ladrilhos antes de mostrar a pré-visualização. Antes, depois de abrir uma fase do tutorial, uma arena de exercício ou um arquivo de arena, a grade e a pré-visualização podiam ficar fora de alinhamento com a mesa até o primeiro clique.
 
 ## Comandos de Python do robô
 
