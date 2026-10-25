@@ -428,6 +428,36 @@ main:has(#rowBuild[style*="flex"]) #rowRobot{display:flex}
 main.cl:not(:has(#rowBuild[style*="flex"])){--side:320px}
 main.cl:not(:has(#rowBuild[style*="flex"])) #empty{padding-right:20px}
 main.cl:not(:has(#rowBuild[style*="flex"])) #tut{right:calc(var(--side) + 24px)}
+
+/* ===== janelas móveis e redimensionáveis ===== */
+#tutWin{position:absolute;top:12px;left:12px;right:calc(var(--side) + 24px);max-width:780px;max-height:42%;z-index:7;display:flex;flex-direction:column}
+#tutWin:has(>#tut[style*="none"]){display:none}
+#tutWin>#tut{position:static;flex:1;min-height:0;max-width:none;max-height:none;overflow:auto}
+main.cl:not(:has(#rowBuild[style*="flex"])) #tutWin{right:calc(var(--side) + 24px)}
+#tut .tt,#blkCard>.ct,.whd{cursor:move}
+.whd{font-weight:700;color:var(--ink-dark);padding-bottom:6px;border-bottom:1px solid var(--line)}
+.rz{position:absolute;pointer-events:auto;z-index:9}
+.rz:hover{background:rgba(59,130,246,.35);border-radius:6px}
+.rz[data-d=n]{top:-4px;left:14px;right:14px;height:8px;cursor:ns-resize}
+.rz[data-d=s]{bottom:-4px;left:14px;right:14px;height:8px;cursor:ns-resize}
+.rz[data-d=e]{right:-4px;top:14px;bottom:14px;width:8px;cursor:ew-resize}
+.rz[data-d=w]{left:-4px;top:14px;bottom:14px;width:8px;cursor:ew-resize}
+.rz[data-d=ne]{top:-4px;right:-4px;width:16px;height:16px;cursor:nesw-resize}
+.rz[data-d=nw]{top:-4px;left:-4px;width:16px;height:16px;cursor:nwse-resize}
+.rz[data-d=se]{bottom:-4px;right:-4px;width:16px;height:16px;cursor:nwse-resize}
+.rz[data-d=sw]{bottom:-4px;left:-4px;width:16px;height:16px;cursor:nesw-resize}
+@media (max-width:760px){
+  #tutWin,#side{position:static!important;left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;width:auto!important;height:auto!important;max-width:none!important;max-height:none!important}
+  .rz{display:none}#tut .tt,#blkCard>.ct,.whd{cursor:default}
+}
+
+/* faixa azul recolhida encolhe mesmo depois de redimensionada */
+#tutWin:has(>#tut.fold){height:auto!important;min-height:0}
+#tutWin:has(>#tut.fold)>#tut{flex:none}
+#tutWin:has(>#tut[style*="none"]){display:none!important}
+
+/* painéis de dados (Robô e sensores): móveis e redimensionáveis */
+.hud{pointer-events:auto!important;cursor:move;user-select:none;resize:both;overflow:auto;min-width:170px;min-height:60px}
 </style>
 </head>
 <body>
@@ -509,7 +539,7 @@ main.cl:not(:has(#rowBuild[style*="flex"])) #tut{right:calc(var(--side) + 24px)}
   <div id="view"><div id="hudL" class="hud"></div><div id="hudR" class="hud"></div><div id="empty"><div class="eb"><b>🔧 Monte seu robô!</b><span>Clique em “Montar robô”.</span></div></div></div>
     
     
-  <div id="tut">
+  <div id="tutWin"><div id="tut">
       <div class="tt">
         <button id="tutFold" title="Recolher/expandir instruções">▾</button>
         <span id="tutT"></span><span id="tutDots"></span>
@@ -521,8 +551,9 @@ main.cl:not(:has(#rowBuild[style*="flex"])) #tut{right:calc(var(--side) + 24px)}
         <button id="tutRst">🔁 Recomeçar fase</button>
       </div>
       <div class="tb"><div id="tutD"></div><div id="tutL"></div></div>
-    </div>
-    <aside id="side"><div class="row" id="rowBuild" style="display:none">
+    </div></div>
+  <aside id="side"><div class="row" id="rowBuild" style="display:none">
+  <div class="whd" title="Arraste para mover a janela (duplo clique restaura)">🧱 Montagem do robô</div>
   <div class="bs"><div class="bt">🧱 Adicionar peças</div><div class="bg2"><span class="dd"><button class="ddb">🧱 Blocos ▾</button><div class="ddm"><button data-part="block">Bloco</button><button data-part="caster">Rodízio (esfera)</button><button data-part="brickI">Viga I (1×3)</button><button data-part="brickL">Peça L (3 células)</button><button data-part="pin">Conector (pino)</button><button data-part="brickI5">Viga longa I (1×5)</button><button data-part="brickQ">Bloco 2×2 (4 células)</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span><span class="dd"><button class="ddb">⚙️ Atuadores ▾</button><div class="ddm"><button data-part="wheel">Motor TT + roda</button><button data-part="servo">Motor servo</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span><span class="dd"><button class="ddb">👁️ Sensores ▾</button><div class="ddm"><button data-part="ultra">Ultrassônico</button><button data-part="color">Sensor de cor</button><button data-part="gyro">Giroscópio</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span><span class="dd"><button class="ddb">🔋 Alimentação ▾</button><div class="ddm"><button data-part="battery">Bateria</button><span class="ddempty">🔒 Libera em fases mais à frente</span></div></span></div><span id="brTools" style="display:none"><button id="brRot" title="Girar a peça (tecla R; Shift+R gira ao contrário)">↻ Girar (R)</button><select id="brCol" title="Cor da peça"></select></span></div>
   <div class="bs"><div class="bt">🛠️ Ferramentas</div><div class="bg2"><button data-part="move">🖐️ Mover</button><button data-part="paint">🎨 Pintar</button><button data-part="erase">🗑️ Apagar</button><button id="undo">↩️ Desfazer</button></div></div>
   <div class="bs"><div class="bt">🤖 Robô</div><div class="bg2"><button id="defbot">🤖 Padrão</button><button id="clrbot">✨ Limpar</button></div><label>🧭 Frente <select id="frontSel"><option value="0">↑ topo da tela</option><option value="1">→ direita</option><option value="2">↓ baixo</option><option value="3">← esquerda</option></select></label><label><input type="checkbox" id="lbl" checked> Rótulos</label></div>
@@ -1574,7 +1605,7 @@ $('rbSave').onclick=saveRobot;$('rbOpen').onclick=()=>$('rbFile').click();
 $('rbFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();
   r.onload=()=>{try{loadRobotData(JSON.parse(r.result),f.name);}catch(x){status('Arquivo inválido: escolha um arquivo .robosim salvo por este simulador.');}};r.readAsText(f);};
 
-function fit(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();const sd=$('side'),col=document.querySelector('main').classList.contains('cl')&&!String($('rowBuild').style.display).includes('flex'),sw=(innerWidth>760&&sd&&!col)?sd.offsetWidth+12:0;if(sw)camera.setViewOffset(w,h,sw/2,0,w,h);else camera.clearViewOffset();}
+function fit(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();const sd=$('side'),col=document.querySelector('main').classList.contains('cl')&&!String($('rowBuild').style.display).includes('flex'),sw=0;if(innerWidth>760&&sd&&!col&&sd.offsetWidth){if(!sd.dataset.free){const L=sd.offsetLeft,Rr=L+sd.offsetWidth,ce=L>w-Rr?L/2:(Rr+w)/2;window.__camOff=w/2-ce;}camera.setViewOffset(w,h,window.__camOff||0,0,w,h);}else camera.clearViewOffset();}
 new ResizeObserver(fit).observe(view);new ResizeObserver(fit).observe($('side'));
 
 /* ---------- Novidades e reporte de bugs ---------- */
@@ -1753,6 +1784,64 @@ function build(){const cur=+sel.value||1,max=sel.options.length;let total=max;tr
 list.onclick=e=>{const b=e.target.closest('.lc');if(!b||b.disabled)return;sel.value=b.dataset.n;sel.dispatchEvent(new Event('change'));};
 $('lsPrev').onclick=()=>list.scrollBy({left:-320,behavior:'smooth'});$('lsNext').onclick=()=>list.scrollBy({left:320,behavior:'smooth'});
 setInterval(()=>{const on=getComputedStyle(tut).display!=='none';mn.classList.toggle('nl',!on);if(on)build();},400);})();
+</script>
+<script>
+(function(){const $=id=>document.getElementById(id),stage=$('stage'),KEY='rs_win';
+let sv={};try{sv=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){}
+let zc=20,op=null;const wins=[],refit=()=>{try{fit()}catch(e){}},save=()=>{try{localStorage.setItem(KEY,JSON.stringify(sv))}catch(e){}};
+function free(el,h){if(el.dataset.free&&(!h||el.dataset.h))return;const r=el.getBoundingClientRect(),q=stage.getBoundingClientRect(),st=el.style;
+ st.left=(r.left-q.left)+'px';st.top=(r.top-q.top)+'px';st.width=r.width+'px';st.right='auto';st.bottom='auto';st.maxWidth='none';st.maxHeight='none';
+ if(h||el.id==='side'){st.height=r.height+'px';el.dataset.h=1;}el.dataset.free=1;}
+function clamp(el){const w=stage.clientWidth,h=stage.clientHeight,st=el.style,ew=el.offsetWidth;
+ st.left=Math.max(-(ew-80),Math.min(w-80,parseFloat(st.left)||0))+'px';st.top=Math.max(0,Math.min(h-40,parseFloat(st.top)||0))+'px';}
+function store(el){const st=el.style;sv[el.id]={l:parseFloat(st.left),t:parseFloat(st.top),w:parseFloat(st.width),h:st.height?parseFloat(st.height):null};save();}
+function reset(el){el.removeAttribute('style');delete el.dataset.free;delete el.dataset.h;delete sv[el.id];save();refit();}
+function restore(el){const v=sv[el.id];if(!v||innerWidth<=760||!isFinite(v.l)||!isFinite(v.w))return;const st=el.style;
+ st.left=v.l+'px';st.top=v.t+'px';st.width=v.w+'px';st.right='auto';st.bottom='auto';st.maxWidth='none';st.maxHeight='none';
+ if(v.h){st.height=v.h+'px';el.dataset.h=1;}el.dataset.free=1;clamp(el);}
+function begin(e,el,type,dir){e.preventDefault();free(el,type==='r');const st=el.style;
+ op={el,type,dir,x:e.clientX,y:e.clientY,l:parseFloat(st.left),t:parseFloat(st.top),w:parseFloat(st.width)||el.offsetWidth,h:parseFloat(st.height)||el.offsetHeight};
+ st.zIndex=Math.min(++zc,58);document.body.style.userSelect='none';}
+window.addEventListener('pointermove',e=>{if(!op)return;const dx=e.clientX-op.x,dy=e.clientY-op.y,st=op.el.style,m=op.el.id==='side'?[300,160]:[320,70];
+ if(op.type==='d'){st.left=(op.l+dx)+'px';st.top=(op.t+dy)+'px';clamp(op.el);}
+ else{let l=op.l,t=op.t,w=op.w,h=op.h;const d=op.dir;
+  if(d.includes('e'))w=Math.max(m[0],op.w+dx);
+  if(d.includes('w')){w=Math.max(m[0],op.w-dx);l=op.l+op.w-w;}
+  if(d.includes('s'))h=Math.max(m[1],op.h+dy);
+  if(d.includes('n')){h=Math.max(m[1],op.h-dy);t=op.t+op.h-h;}
+  st.left=l+'px';st.top=t+'px';st.width=w+'px';st.height=h+'px';}
+ refit();});
+window.addEventListener('pointerup',()=>{if(!op)return;store(op.el);op=null;document.body.style.userSelect='';refit();});
+const SKIP='button,select,input,label,a,textarea';
+function setup(id,heads){const el=$(id);
+ ['n','s','e','w','ne','nw','se','sw'].forEach(d=>{const h=document.createElement('div');h.className='rz';h.dataset.d=d;h.addEventListener('pointerdown',e=>{if(e.button||innerWidth<=760)return;begin(e,el,'r',d);});el.appendChild(h);});
+ el.addEventListener('pointerdown',e=>{el.style.zIndex=Math.min(++zc,58);if(e.button||innerWidth<=760)return;const hd=e.target.closest(heads);if(hd&&el.contains(hd)&&!e.target.closest(SKIP))begin(e,el,'d');},true);
+ el.addEventListener('dblclick',e=>{const hd=e.target.closest(heads);if(hd&&el.contains(hd)&&!e.target.closest(SKIP))reset(el);});
+ el.querySelectorAll(heads).forEach(x=>{if(!x.title)x.title='Arraste para mover a janela (duplo clique restaura)';});
+ restore(el);wins.push(el);}
+setup('tutWin','#tut .tt');setup('side','#blkCard>.ct, .whd');
+addEventListener('resize',()=>wins.forEach(el=>{if(el.dataset.free&&innerWidth>760)clamp(el);}));
+setTimeout(refit,300);})();
+</script>
+<script>
+(function(){const $=id=>document.getElementById(id),view=$('view'),mn=document.querySelector('main'),KEY='rs_hud',UI='rs_ui';
+let sv={},ui={};try{sv=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){}try{ui=JSON.parse(localStorage.getItem(UI)||'{}')||{}}catch(e){}
+const put=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};let op=null,zc=5;
+function clamp(el){const st=el.style,w=view.clientWidth,h=view.clientHeight;st.left=Math.max(-(el.offsetWidth-60),Math.min(w-60,parseFloat(st.left)||0))+'px';st.top=Math.max(0,Math.min(h-30,parseFloat(st.top)||0))+'px';}
+function pin(el){const r=el.getBoundingClientRect(),q=view.getBoundingClientRect(),st=el.style;st.left=(r.left-q.left)+'px';st.top=(r.top-q.top)+'px';st.right='auto';st.bottom='auto';}
+['hudL','hudR'].forEach(id=>{const el=$(id),v=sv[id];
+ if(v&&innerWidth>760&&isFinite(v.l)){const st=el.style;st.left=v.l+'px';st.top=v.t+'px';st.right='auto';st.bottom='auto';if(v.w)st.width=v.w+'px';if(v.h)st.height=v.h+'px';}
+ el.title='Arraste para mover, puxe o canto para redimensionar (duplo clique restaura)';
+ el.addEventListener('pointerdown',e=>{if(e.button||innerWidth<=760)return;const r=el.getBoundingClientRect();if(e.clientX>r.right-20&&e.clientY>r.bottom-20)return;
+  e.preventDefault();pin(el);const st=el.style;op={el,id,x:e.clientX,y:e.clientY,l:parseFloat(st.left),t:parseFloat(st.top)};st.zIndex=++zc;});
+ el.addEventListener('dblclick',()=>{['left','top','right','bottom','width','height'].forEach(p=>el.style.removeProperty(p));delete sv[id];put(KEY,sv);});
+ new ResizeObserver(()=>{if(op||!(el.style.width||el.style.height)||el.style.display==='none')return;const o=sv[id]||{};o.w=parseFloat(el.style.width)||o.w;o.h=parseFloat(el.style.height)||o.h;if(el.style.left)o.l=parseFloat(el.style.left),o.t=parseFloat(el.style.top);sv[id]=o;put(KEY,sv);}).observe(el);});
+addEventListener('pointermove',e=>{if(!op)return;const st=op.el.style;st.left=(op.l+e.clientX-op.x)+'px';st.top=(op.t+e.clientY-op.y)+'px';clamp(op.el);});
+addEventListener('pointerup',()=>{if(!op)return;const st=op.el.style,o=sv[op.id]||{};o.l=parseFloat(st.left);o.t=parseFloat(st.top);if(st.width)o.w=parseFloat(st.width);if(st.height)o.h=parseFloat(st.height);sv[op.id]=o;put(KEY,sv);op=null;});
+/* lembra também ferramentas e programação recolhidas */
+if(ui.cl)$('blkFold').click();if(ui.tc)$('toolFold').click();
+['blkFold','toolFold'].forEach(b=>$(b).addEventListener('click',()=>setTimeout(()=>{ui.cl=mn.classList.contains('cl');ui.tc=mn.classList.contains('tc');put(UI,ui);},0)));
+})();
 </script>
 </body>
 </html>
