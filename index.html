@@ -460,15 +460,7 @@ main.cl:not(:has(#rowBuild[style*="flex"])) #tutWin{right:calc(var(--side) + 24p
 .hud{pointer-events:auto!important;cursor:move;user-select:none;resize:both;overflow:auto;min-width:170px;min-height:60px}
 
 #tools #rowRobot{display:flex}
-/* faixa azul: cresce para mostrar todo o texto e as fontes acompanham a largura da janela */
-#tutWin{container-type:inline-size;max-height:calc(100% - var(--strip) - 28px)}
-#tut{font-size:clamp(12px,1.9cqw,16px)}
-#tut .tt{font-size:clamp(13px,2.3cqw,18px)}
-#tut .tt button,#tut .tt select{font-size:clamp(11px,1.7cqw,14px)}
-#tut .mis{font-size:clamp(15px,3cqw,24px)}
-#tut .mis .ic{font-size:clamp(28px,5.6cqw,46px)}
-#tutL div{font-size:clamp(13px,2.2cqw,18px)}
-#tut .hint,#tut .more{font-size:clamp(12px,1.9cqw,15px)}
+#tutWin{max-height:calc(100% - var(--strip) - 28px)}
 @media (max-width:760px){#tutWin{max-height:none!important}}
 /* ===== visual mais compacto: tamanhos acompanham a largura e a altura da janela ===== */
 header{padding:5px 12px;gap:6px}header h1{font-size:16px;margin-right:4px}
@@ -479,18 +471,21 @@ main{--side:min(380px,33vw);--strip:clamp(92px,14vh,124px)}
 #lessons{height:calc(var(--strip) - 26px);gap:3px}#lessons .lt{font-size:11px}
 .lc{min-width:clamp(140px,12vw,190px);max-width:240px;padding:5px 12px;gap:8px;font-size:clamp(10px,.8vw,12px)}
 #lsRow>button{width:28px;height:28px;font-size:16px}
-#tut{padding:7px 12px 9px;font-size:calc(clamp(10px,min(1.9cqw,1.7vh),15px)*var(--tf,1))}
-#tut .tt{gap:6px;font-size:calc(clamp(11px,min(2.2cqw,1.9vh),16px)*var(--tf,1))}
-#tut .tt button,#tut .tt select{padding:3px 8px;font-size:calc(clamp(10px,min(1.6cqw,1.5vh),13px)*var(--tf,1))}
+#tut{padding:7px 12px 9px;font-size:15px}
+#tut .tt{gap:6px;font-size:16px}
+#tut .tt button,#tut .tt select{padding:3px 8px;font-size:13px}
 #tut .tb{gap:6px 12px;margin-top:5px}
-#tut .mis{gap:8px;font-size:calc(clamp(13px,min(2.8cqw,2.6vh),21px)*var(--tf,1))}
-#tut .mis .ic{font-size:calc(clamp(24px,min(5cqw,4.6vh),38px)*var(--tf,1))}
-#tutL{padding:5px 8px}#tutL div{padding:1px 0;font-size:calc(clamp(11px,min(2cqw,1.9vh),15px)*var(--tf,1))}
-#tut .hint,#tut .more{padding:4px 8px;margin-top:5px;font-size:calc(clamp(10px,min(1.8cqw,1.6vh),14px)*var(--tf,1))}
+#tut .mis{gap:8px;font-size:21px}
+#tut .mis .ic{font-size:38px}
+#tutL{padding:5px 8px}#tutL div{padding:1px 0;font-size:15px}
+#tut .hint,#tut .more{padding:4px 8px;margin-top:5px;font-size:14px}
 #blkCard>.ct{gap:4px;padding:6px 8px}#blkCard>.ct button{padding:4px 8px;font-size:clamp(10px,.8vw,12px)}#blkCard>.ct .ctl{font-size:clamp(11px,.9vw,13px)}
 .blocklyTreeLabel{font-size:clamp(11px,.9vw,13px)!important}
 #empty .eb{padding:14px 22px}#empty .eb b{font-size:clamp(17px,1.9vw,26px)}#empty .eb span{font-size:clamp(11px,.9vw,13px)}
 .hud{font-size:clamp(10px,.8vw,12px)}
+/* faixa azul: o conteúdo ocupa exatamente a janela (sem limite próprio de altura), para o ajuste do texto medir certo */
+#tutWin{display:flex;flex-direction:column;overflow:hidden}
+#tutWin>#tut{flex:1 1 auto;min-height:0;max-height:none;overflow:auto}
 </style>
 </head>
 <body>
@@ -1676,7 +1671,7 @@ new ResizeObserver(fit).observe(view);new ResizeObserver(fit).observe($('side'))
 /* ---------- Novidades e reporte de bugs ---------- */
 const APP_VER='2026.10.26',BUG_FORM='https://forms.gle/VAFQdgK1jBVsV51D6';  /* coloque aqui o e-mail que vai receber os relatórios */
 const CHANGELOG=[
- {v:'2026.10.26',t:'Mais fases de seguidor de linha e execução simplificada',i:['4 novas fases de seguidor de linha: curvas fechadas, linha interrompida, cruzamento sem marcador e beco sem saída (dois verdes). O tutorial agora tem 14 fases (projetos salvos antes são convertidos para a nova numeração)','O botão Verificar robô foi unido ao ▶️ Executar: na Fase 1 ele confere o robô','Novo botão ▶️ Executar na janela de programação (blocos e Python)','Fase 1: o item “Todas as peças ligadas” saiu da lista (já vinha marcado); a verificação de peças soltas agora faz parte do item do chassi','Editor Python: Shift+Backspace, Shift+Delete ou Shift+Tab removem a indentação (4 espaços ou tab) da linha ou das linhas selecionadas','Carregar robô sempre disponível na barra de ferramentas, em todas as abas','Interface mais compacta, com tamanhos que acompanham a janela; na faixa azul do tutorial o texto diminui para caber em vez de ser cortado']},
+ {v:'2026.10.26',t:'Mais fases de seguidor de linha e execução simplificada',i:['4 novas fases de seguidor de linha: curvas fechadas, linha interrompida, cruzamento sem marcador e beco sem saída (dois verdes). O tutorial agora tem 14 fases (projetos salvos antes são convertidos para a nova numeração)','O botão Verificar robô foi unido ao ▶️ Executar: na Fase 1 ele confere o robô','Novo botão ▶️ Executar na janela de programação (blocos e Python)','Fase 1: o item “Todas as peças ligadas” saiu da lista (já vinha marcado); a verificação de peças soltas agora faz parte do item do chassi','Editor Python: Shift+Backspace, Shift+Delete ou Shift+Tab removem a indentação (4 espaços ou tab) da linha ou das linhas selecionadas','Carregar robô sempre disponível na barra de ferramentas, em todas as abas','Interface mais compacta, com tamanhos que acompanham a janela; a faixa azul do tutorial tem tamanho fixo e só abre e fecha, sem ser cortada']},
  {v:'2026.10.24',t:'Pontuação nas arenas montadas',i:['Arenas montadas com a peça Início valem pontos da OBR (início, percurso, vítimas, chegada)','A rodada termina quando o programa acaba, com o resumo de pontos no centro da tela','Tombou: aviso vermelho no centro, com o motivo','Limpar arena agora também limpa as salas da OBR','Salvar/abrir arena e projeto agora guardam as peças montadas','Física: freada limitada pela aderência e tombamento por arrancada/freada só se durar; robôs de 4 rodas sem rodízio não tombam mais ao parar'],},
  {v:'2026.10.23',t:'Salas da OBR e novos blocos',i:['3 salas reais da OBR 2020 (Nível 1) recriadas na aba Arena','Bloco "quando" (roda em paralelo ao programa)','Girar motor por rotações ou graus, com sentido horário/anti-horário','Tutorial com missões curtas e ícones','Removidos: ruído dos sensores, desafio da rampa e resgates do criador de mapas','Correção: bolinhas presas na parede no desafio 10']}];
 const fbk=$('fbk'),fbb=$('fbkBox');
@@ -1838,16 +1833,6 @@ function obrFromTiles(){const st=TILES.find(t=>t.type==='start');OBR.on=!!st;OBR
   OBR.way=w;OBR.exs='any';if(room)OBR.layout={ix0:cX(room.gx)-15,ix1:cX(room.gx+2)+15,iz0:cZ(room.gz)-15,iz1:cZ(room.gz+2)+15,doors:[]};
   if(gl){const c=tCenter(gl);OBR.fin={x:c[0],z:c[1]};}OBR.tris=objs.filter(o=>o.t==='tri');obrReset();}
 $('stop').addEventListener('click',()=>{if(OBR.on&&!OBR.ended&&OBR.t>3)obrEnd('manual');});
-(()=>{const tw=$('tutWin'),t=$('tut');let raf=0,lw=0,lh=0;
- const fits=()=>t.scrollHeight<=t.clientHeight+1;
- const run=()=>{raf=0;if(innerWidth<=760||!tw.offsetParent||t.classList.contains('fold')){t.style.removeProperty('--tf');return;}
-  let a=.4,b=1;t.style.setProperty('--tf',1);
-  if(!fits()){for(let i=0;i<8;i++){const m=(a+b)/2;t.style.setProperty('--tf',m);if(fits())a=m;else b=m;}t.style.setProperty('--tf',a);}
-  lw=tw.offsetWidth;lh=tw.offsetHeight;};
- const sc=()=>{if(!raf)raf=requestAnimationFrame(run);};
- new ResizeObserver(()=>{if(tw.offsetWidth===lw&&tw.offsetHeight===lh)return;sc();}).observe(tw);
- new MutationObserver(sc).observe(t,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']});
- addEventListener('resize',sc);sc();})();
 buildRobot();refresh();loadLevel(1);setMode('sim');fit();requestAnimationFrame(frame);
 </script>
 <script>
@@ -1895,7 +1880,7 @@ function setup(id,heads){const el=$(id);
  el.addEventListener('dblclick',e=>{const hd=e.target.closest(heads);if(hd&&el.contains(hd)&&!e.target.closest(SKIP))reset(el);});
  el.querySelectorAll(heads).forEach(x=>{if(!x.title)x.title='Arraste para mover a janela (duplo clique restaura)';});
  restore(el);wins.push(el);}
-setup('tutWin','#tut .tt');setup('side','#blkCard>.ct, .whd');
+setup('side','#blkCard>.ct, .whd');
 addEventListener('resize',()=>wins.forEach(el=>{if(el.dataset.free&&innerWidth>760)clamp(el);}));
 setTimeout(refit,300);})();
 </script>
